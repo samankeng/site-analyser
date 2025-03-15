@@ -1,0 +1,337 @@
+site-analyser/
+├── .github/                            # GitHub configuration
+│   └── workflows/                      # GitHub Actions workflows
+│       ├── ci.yml                      # CI workflow
+│       └── deploy.yml                  # Deployment workflow
+│
+├── client/                             # Frontend application (React)
+│   ├── public/                         # Static assets
+│   │   ├── favicon.ico                 # Site favicon
+│   │   ├── index.html                  # HTML template
+│   │   ├── manifest.json               # Web app manifest
+│   │   └── robots.txt                  # Robots file
+│   │
+│   ├── src/                            # Source code
+│   │   ├── assets/                     # Images, fonts, etc.
+│   │   │   ├── fonts/                  # Custom fonts
+│   │   │   ├── images/                 # Image assets
+│   │   │   └── icons/                  # Icon assets
+│   │   │
+│   │   ├── components/                 # Reusable UI components
+│   │   │   ├── common/                 # Shared components
+│   │   │   │   ├── Alert.js            # Alert component
+│   │   │   │   ├── Button.js           # Custom button component
+│   │   │   │   ├── Loader.js           # Loading indicator
+│   │   │   │   ├── Modal.js            # Modal dialog
+│   │   │   │   └── Navbar.js           # Navigation bar
+│   │   │   │
+│   │   │   ├── dashboard/              # Dashboard-specific components
+│   │   │   │   ├── AlertsWidget.js     # Alerts display widget
+│   │   │   │   ├── ScanHistoryTable.js # Recent scans table
+│   │   │   │   ├── SecurityScoreCard.js # Security score display
+│   │   │   │   └── VulnerabilityChart.js # Vulnerability visualizations
+│   │   │   │
+│   │   │   ├── reports/                # Report-specific components
+│   │   │   │   ├── AiRecommendations.js # AI analysis display
+│   │   │   │   ├── HeaderAnalysis.js   # Header findings display
+│   │   │   │   ├── SslAnalysis.js      # SSL findings display
+│   │   │   │   └── VulnerabilityList.js # Vulnerabilities display
+│   │   │   │
+│   │   │   └── security/               # Security analysis components
+│   │   │       ├── ScanForm.js         # URL scan form
+│   │   │       ├── ScanOptions.js      # Scan configuration options
+│   │   │       └── ScanProgress.js     # Scan progress indicator
+│   │   │
+│   │   ├── contexts/                   # React context providers
+│   │   │   ├── AlertContext.js         # Alert notifications context
+│   │   │   ├── AuthContext.js          # Authentication context
+│   │   │   └── ThemeContext.js         # UI theme context
+│   │   │
+│   │   ├── hooks/                      # Custom React hooks
+│   │   │   ├── useAuth.js              # Authentication hook
+│   │   │   ├── useScan.js              # Scan operations hook
+│   │   │   └── useWindowSize.js        # Responsive design hook
+│   │   │
+│   │   ├── pages/                      # Page components
+│   │   │   ├── auth/                   # Authentication pages
+│   │   │   │   ├── Login.js            # Login page
+│   │   │   │   ├── Register.js         # Registration page
+│   │   │   │   └── ResetPassword.js    # Password reset page
+│   │   │   │
+│   │   │   ├── dashboard/              # Dashboard pages
+│   │   │   │   └── Dashboard.js        # Main dashboard
+│   │   │   │
+│   │   │   ├── reports/                # Report pages
+│   │   │   │   ├── ReportList.js       # List of reports
+│   │   │   │   └── SecurityReport.js   # Detailed report view
+│   │   │   │
+│   │   │   ├── scans/                  # Scan pages
+│   │   │   │   ├── NewScan.js          # New scan page
+│   │   │   │   └── ScanStatus.js       # Scan status/results page
+│   │   │   │
+│   │   │   ├── settings/               # Settings pages
+│   │   │   │   ├── Account.js          # Account settings
+│   │   │   │   ├── Notifications.js    # Notification settings
+│   │   │   │   └── Security.js         # Security settings
+│   │   │   │
+│   │   │   ├── ErrorPage.js            # Error page
+│   │   │   ├── HomePage.js             # Landing page
+│   │   │   └── NotFound.js             # 404 page
+│   │   │
+│   │   ├── services/                   # API service integrations
+│   │   │   ├── api.js                  # API client setup
+│   │   │   ├── authService.js          # Authentication API calls
+│   │   │   ├── reportService.js        # Report API calls
+│   │   │   └── scanService.js          # Scan API calls
+│   │   │
+│   │   ├── store/                      # Redux state management
+│   │   │   ├── actions/                # Redux actions
+│   │   │   │   ├── alertActions.js     # Alert-related actions
+│   │   │   │   ├── authActions.js      # Auth-related actions
+│   │   │   │   ├── dashboardActions.js # Dashboard-related actions
+│   │   │   │   ├── reportActions.js    # Report-related actions
+│   │   │   │   └── scanActions.js      # Scan-related actions
+│   │   │   │
+│   │   │   ├── reducers/               # Redux reducers
+│   │   │   │   ├── alertReducer.js     # Alert state reducer
+│   │   │   │   ├── authReducer.js      # Auth state reducer
+│   │   │   │   ├── dashboardReducer.js # Dashboard state reducer
+│   │   │   │   ├── reportReducer.js    # Report state reducer
+│   │   │   │   ├── scanReducer.js      # Scan state reducer
+│   │   │   │   └── index.js            # Root reducer
+│   │   │   │
+│   │   │   ├── selectors/              # Redux selectors
+│   │   │   │   ├── alertSelectors.js   # Alert state selectors
+│   │   │   │   └── scanSelectors.js    # Scan state selectors
+│   │   │   │
+│   │   │   └── store.js                # Redux store configuration
+│   │   │
+│   │   ├── utils/                      # Utility functions
+│   │   │   ├── apiUtils.js             # API helper functions
+│   │   │   ├── formatters.js           # Data formatting utilities
+│   │   │   ├── storage.js              # Local storage utilities
+│   │   │   └── validators.js           # Input validation utilities
+│   │   │
+│   │   ├── App.js                      # Main application component
+│   │   ├── index.js                    # Entry point
+│   │   ├── routes.js                   # Application routes
+│   │   └── theme.js                    # UI theme configuration
+│   │
+│   ├── .env                            # Environment variables
+│   ├── .env.development                # Development environment variables
+│   ├── .env.production                 # Production environment variables
+│   ├── .eslintrc.js                    # ESLint configuration
+│   ├── .prettierrc                     # Prettier configuration
+│   ├── Dockerfile                      # Docker configuration
+│   ├── nginx.conf                      # Nginx configuration for production
+│   ├── package.json                    # Dependencies and scripts
+│   └── README.md                       # Frontend documentation
+│
+├── server/                             # Backend application (Node.js/Express)
+│   ├── src/
+│   │   ├── api/                        # API routes and controllers
+│   │   │   ├── auth/                   # Authentication endpoints
+│   │   │   │   ├── controller.js       # Auth controller
+│   │   │   │   ├── routes.js           # Auth routes
+│   │   │   │   └── validation.js       # Auth input validation
+│   │   │   │
+│   │   │   ├── scans/                  # Security scan endpoints
+│   │   │   │   ├── controller.js       # Scan controller
+│   │   │   │   ├── routes.js           # Scan routes
+│   │   │   │   └── validation.js       # Scan input validation
+│   │   │   │
+│   │   │   ├── reports/                # Reporting endpoints
+│   │   │   │   ├── controller.js       # Report controller
+│   │   │   │   ├── routes.js           # Report routes
+│   │   │   │   └── validation.js       # Report input validation
+│   │   │   │
+│   │   │   └── alerts/                 # Alert management endpoints
+│   │   │       ├── controller.js       # Alert controller
+│   │   │       ├── routes.js           # Alert routes
+│   │   │       └── validation.js       # Alert input validation
+│   │   │
+│   │   ├── config/                     # Configuration files
+│   │   │   ├── database.js             # Database configuration
+│   │   │   ├── index.js                # Main configuration
+│   │   │   ├── logger.js               # Logging configuration
+│   │   │   ├── redis.js                # Redis configuration
+│   │   │   └── swagger.json            # API documentation
+│   │   │
+│   │   ├── middleware/                 # Custom middleware
+│   │   │   ├── asyncHandler.js         # Async error handling
+│   │   │   ├── auth.js                 # Authentication middleware
+│   │   │   ├── errorHandler.js         # Error handling middleware
+│   │   │   ├── rateLimiter.js          # Rate limiting middleware
+│   │   │   └── validators.js           # Input validation middleware
+│   │   │
+│   │   ├── models/                     # MongoDB models
+│   │   │   ├── Alert.js                # Alert model
+│   │   │   ├── Result.js               # Scan result model
+│   │   │   ├── Scan.js                 # Scan model
+│   │   │   └── User.js                 # User model
+│   │   │
+│   │   ├── services/                   # Business logic services
+│   │   │   ├── scanners/               # Security scanning modules
+│   │   │   │   ├── ContentScanner.js   # Content analysis scanner
+│   │   │   │   ├── HeaderScanner.js    # HTTP header scanner
+│   │   │   │   ├── PerformanceScanner.js # Performance scanner
+│   │   │   │   ├── PortScanner.js      # Port scanning module
+│   │   │   │   ├── ScanService.js      # Main scan orchestration service
+│   │   │   │   ├── SslScanner.js       # SSL/TLS scanner
+│   │   │   │   └── VulnerabilityScanner.js # Vulnerability scanner
+│   │   │   │
+│   │   │   ├── notifications/          # Alert notification services
+│   │   │   │   ├── EmailService.js     # Email notification service
+│   │   │   │   └── NotificationService.js # Main notification service
+│   │   │   │
+│   │   │   └── integrations/           # External API integrations
+│   │   │       ├── AIService.js        # AI service integration
+│   │   │       ├── ShodanService.js    # Shodan API integration
+│   │   │       ├── SslLabsService.js   # SSL Labs API integration
+│   │   │       └── VirusTotalService.js # VirusTotal API integration
+│   │   │
+│   │   ├── utils/                      # Utility functions
+│   │   │   ├── ApiError.js             # API error class
+│   │   │   ├── formatters.js           # Data formatting utilities
+│   │   │   ├── logger.js               # Logging utility
+│   │   │   └── validators.js           # Input validation utilities
+│   │   │
+│   │   └── app.js                      # Express application setup
+│   │
+│   ├── tests/                          # Test files
+│   │   ├── integration/                # Integration tests
+│   │   │   ├── auth.test.js            # Auth API tests
+│   │   │   ├── scan.test.js            # Scan API tests
+│   │   │   └── report.test.js          # Report API tests
+│   │   │
+│   │   └── unit/                       # Unit tests
+│   │       ├── controllers/            # Controller tests
+│   │       ├── middleware/             # Middleware tests
+│   │       ├── models/                 # Model tests
+│   │       └── services/               # Service tests
+│   │
+│   ├── .env                            # Environment variables
+│   ├── .env.test                       # Test environment variables
+│   ├── .eslintrc.js                    # ESLint configuration
+│   ├── .prettierrc                     # Prettier configuration
+│   ├── Dockerfile                      # Docker configuration
+│   ├── package.json                    # Dependencies and scripts
+│   └── README.md                       # Backend documentation
+│
+├── ai-service/                         # AI/ML service (FastAPI/Python)
+│   ├── app/
+│   │   ├── api/                        # API endpoints
+│   │   │   ├── analyze.py              # Analysis endpoints
+│   │   │   ├── health.py               # Health check endpoints
+│   │   │   └── routes.py               # Route definitions
+│   │   │
+│   │   ├── core/                       # Core functionality
+│   │   │   ├── config.py               # Configuration management
+│   │   │   ├── errors.py               # Error handling
+│   │   │   ├── logging.py              # Logging setup
+│   │   │   └── security.py             # API security
+│   │   │
+│   │   ├── models/                     # ML model definitions
+│   │   │   ├── threat_detection/       # Threat detection models
+│   │   │   │   ├── classifier.py       # Threat classification model
+│   │   │   │   └── training.py         # Model training utilities
+│   │   │   │
+│   │   │   ├── anomaly_detection/      # Anomaly detection models
+│   │   │   │   ├── isolation_forest.py # Isolation forest model
+│   │   │   │   └── training.py         # Model training utilities
+│   │   │   │
+│   │   │   └── risk_scoring/           # Risk scoring models
+│   │   │       ├── scoring_model.py    # Risk scoring model
+│   │   │       └── training.py         # Model training utilities
+│   │   │
+│   │   ├── services/                   # Service layer
+│   │   │   ├── ai_analysis.py          # AI analysis service
+│   │   │   ├── ollama_client.py        # Ollama LLM client
+│   │   │   └── threat_intelligence.py  # Threat intelligence service
+│   │   │
+│   │   ├── schemas/                    # Pydantic schemas
+│   │   │   ├── analysis.py             # Analysis request/response schemas
+│   │   │   └── common.py               # Common schemas
+│   │   │
+│   │   └── utils/                      # Utility functions
+│   │       ├── formatters.py           # Data formatting utilities
+│   │       └── validators.py           # Input validation utilities
+│   │
+│   ├── tests/                          # Test files
+│   │   ├── api/                        # API tests
+│   │   │   └── test_analyze.py         # Analysis endpoint tests
+│   │   │
+│   │   ├── models/                     # Model tests
+│   │   │   ├── test_anomaly_detection.py # Anomaly detection tests
+│   │   │   └── test_risk_scoring.py     # Risk scoring tests
+│   │   │
+│   │   └── services/                   # Service tests
+│   │       ├── test_ai_analysis.py     # AI analysis service tests
+│   │       └── test_threat_intelligence.py # Threat intelligence tests
+│   │
+│   ├── .env                            # Environment variables
+│   ├── .env.test                       # Test environment variables
+│   ├── .flake8                         # Flake8 configuration
+│   ├── .isort.cfg                      # isort configuration
+│   ├── Dockerfile                      # Docker configuration
+│   ├── main.py                         # Entry point
+│   ├── pyproject.toml                  # Python project configuration
+│   ├── requirements.txt                # Python dependencies
+│   └── README.md                       # AI service documentation
+│
+├── docker/                             # Docker configuration
+│   ├── client/                         # Frontend Docker setup
+│   │   └── nginx.conf                  # Nginx configuration
+│   │
+│   ├── server/                         # Backend Docker setup
+│   │   └── entrypoint.sh               # Entrypoint script
+│   │
+│   ├── ai-service/                     # AI service Docker setup
+│   │   └── entrypoint.sh               # Entrypoint script
+│   │
+│   └── docker-compose.yml              # Multi-container setup
+│
+├── terraform/                          # Infrastructure as code
+│   ├── modules/                        # Terraform modules
+│   │   ├── networking/                 # Networking infrastructure
+│   │   ├── database/                   # Database infrastructure
+│   │   ├── compute/                    # Compute infrastructure
+│   │   └── security/                   # Security infrastructure
+│   │
+│   └── environments/                   # Environment configurations
+│       ├── development/                # Development environment
+│       ├── staging/                    # Staging environment
+│       └── production/                 # Production environment
+│
+├── kubernetes/                         # Kubernetes configuration
+│   ├── development/                    # Development environment
+│   │   ├── client-deployment.yaml      # Frontend deployment
+│   │   ├── server-deployment.yaml      # Backend deployment
+│   │   └── ai-service-deployment.yaml  # AI service deployment
+│   │
+│   └── production/                     # Production environment
+│       ├── client-deployment.yaml      # Frontend deployment
+│       ├── server-deployment.yaml      # Backend deployment
+│       └── ai-service-deployment.yaml  # AI service deployment
+│
+├── docs/                               # Documentation
+│   ├── api/                            # API documentation
+│   │   ├── auth.md                     # Auth API docs
+│   │   ├── scans.md                    # Scan API docs
+│   │   └── reports.md                  # Report API docs
+│   │
+│   ├── architecture/                   # Architecture diagrams
+│   │   ├── high-level.md               # High-level architecture
+│   │   ├── data-flow.md                # Data flow diagrams
+│   │   └── component-interaction.md    # Component interaction
+│   │
+│   └── user-guides/                    # User documentation
+│       ├── getting-started.md          # Getting started guide
+│       ├── scanning.md                 # Scanning guide
+│       └── reports.md                  # Reports guide
+│
+├── .gitignore                          # Git ignore file
+├── .editorconfig                       # Editor configuration
+├── docker-compose.yml                  # Root Docker Compose file
+├── package.json                        # Root package.json for scripts
+└── README.md                           # Project documentation
