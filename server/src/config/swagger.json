@@ -1,0 +1,1027 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Site Analyser API",
+    "description": "API documentation for the Site Analyser security scanning platform",
+    "version": "1.0.0",
+    "contact": {
+      "email": "support@site-analyser.com"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://site-analyser.com/license"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "API Version 1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and user management"
+    },
+    {
+      "name": "Scans",
+      "description": "Security scan operations"
+    },
+    {
+      "name": "Reports",
+      "description": "Security report operations"
+    },
+    {
+      "name": "Alerts",
+      "description": "Security alert management"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Create a new user account",
+        "operationId": "registerUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Log in a user",
+        "description": "Log in with email and password",
+        "operationId": "loginUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user",
+        "description": "Get information about the currently authenticated user",
+        "operationId": "getCurrentUser",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scans": {
+      "get": {
+        "tags": ["Scans"],
+        "summary": "Get all scans",
+        "description": "Get a list of security scans for the current user",
+        "operationId": "getAllScans",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "in_progress", "completed", "failed", "cancelled"]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort field and direction",
+            "schema": {
+              "type": "string",
+              "example": "createdAt:desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of scans",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Scans"],
+        "summary": "Initiate a new scan",
+        "description": "Create a new security scan for a website",
+        "operationId": "createScan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewScanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Scan initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanCreatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "Get all reports",
+        "description": "Get a list of security reports for the current user",
+        "operationId": "getAllReports",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "description": "Filter by severity",
+            "schema": {
+              "type": "string",
+              "enum": ["critical", "high", "medium", "low", "info"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of reports",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alerts": {
+      "get": {
+        "tags": ["Alerts"],
+        "summary": "Get all alerts",
+        "description": "Get a list of security alerts for the current user",
+        "operationId": "getAllAlerts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": {
+              "type": "string",
+              "enum": ["new", "read", "resolved", "ignored"]
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "description": "Filter by severity",
+            "schema": {
+              "type": "string",
+              "enum": ["critical", "high", "medium", "low", "info"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of alerts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Alerts"],
+        "summary": "Create a new alert",
+        "description": "Create a new security alert",
+        "operationId": "createAlert",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAlertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Alert created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePassword123!"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePassword123!"
+          },
+          "mfaToken": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              },
+              "name": {
+                "type": "string",
+                "example": "John Doe"
+              },
+              "email": {
+                "type": "string",
+                "example": "john@example.com"
+              },
+              "role": {
+                "type": "string",
+                "example": "user"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              },
+              "name": {
+                "type": "string",
+                "example": "John Doe"
+              },
+              "email": {
+                "type": "string",
+                "example": "john@example.com"
+              },
+              "role": {
+                "type": "string",
+                "example": "user"
+              },
+              "emailVerified": {
+                "type": "boolean",
+                "example": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastLogin": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "preferences": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "NewScanRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://example.com"
+          },
+          "scanDepth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "default": 2,
+            "example": 2,
+            "description": "1: Basic, 2: Standard, 3: Comprehensive"
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "checkSsl": {
+                "type": "boolean",
+                "default": true
+              },
+              "checkHeaders": {
+                "type": "boolean",
+                "default": true
+              },
+              "checkVulnerabilities": {
+                "type": "boolean",
+                "default": true
+              },
+              "checkPerformance": {
+                "type": "boolean",
+                "default": false
+              },
+              "checkPorts": {
+                "type": "boolean",
+                "default": false
+              },
+              "customPorts": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "example": [22, 80, 443, 3306]
+              },
+              "useAI": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        }
+      },
+      "ScanCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Scan initiated successfully"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "scanId": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              },
+              "status": {
+                "type": "string",
+                "example": "pending"
+              },
+              "estimatedTime": {
+                "type": "integer",
+                "example": 120,
+                "description": "Estimated completion time in seconds"
+              }
+            }
+          }
+        }
+      },
+      "ScanListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "example": 50
+              },
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "pages": {
+                "type": "integer",
+                "example": 5
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+                },
+                "url": {
+                  "type": "string",
+                  "example": "https://example.com"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["pending", "in_progress", "completed", "failed", "cancelled"],
+                  "example": "completed"
+                },
+                "progress": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "example": 100
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "summary": {
+                  "type": "object",
+                  "properties": {
+                    "overall": {
+                      "type": "integer",
+                      "example": 82
+                    },
+                    "ssl": {
+                      "type": "integer",
+                      "example": 85
+                    },
+                    "headers": {
+                      "type": "integer",
+                      "example": 78
+                    },
+                    "vulnerabilities": {
+                      "type": "integer",
+                      "example": 90
+                    },
+                    "server": {
+                      "type": "integer",
+                      "example": 75
+                    },
+                    "findings": {
+                      "type": "object",
+                      "properties": {
+                        "critical": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "high": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "medium": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "low": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "info": {
+                          "type": "integer",
+                          "example": 10
+                        }
+                      }
+                    }
+                    },
+                    "findings": {
+                      "type": "object",
+                      "properties": {
+                        "critical": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "high": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "medium": {
+                          "type": "integer",
+                          "example": 3
+                        },
+                        "low": {
+                          "type": "integer",
+                          "example": 5
+                        },
+                        "info": {
+                          "type": "integer",
+                          "example": 10
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "CreateAlertRequest": {
+        "type": "object",
+        "required": ["title", "message", "severity", "type"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Critical Vulnerability Detected"
+          },
+          "message": {
+            "type": "string",
+            "example": "A critical vulnerability has been detected in your website. Please review the scan results and take action."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "info"],
+            "example": "critical"
+          },
+          "type": {
+            "type": "string",
+            "example": "security"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://example.com"
+          },
+          "scanId": {
+            "type": "string",
+            "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+          },
+          "data": {
+            "type": "object",
+            "description": "Additional data related to the alert"
+          }
+        }
+      },
+      "AlertResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              },
+              "userId": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              },
+              "title": {
+                "type": "string",
+                "example": "Critical Vulnerability Detected"
+              },
+              "message": {
+                "type": "string",
+                "example": "A critical vulnerability has been detected in your website."
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["critical", "high", "medium", "low", "info"],
+                "example": "critical"
+              },
+              "type": {
+                "type": "string",
+                "example": "security"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["new", "read", "resolved", "ignored"],
+                "example": "new"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "url": {
+                "type": "string",
+                "example": "https://example.com"
+              },
+              "scanId": {
+                "type": "string",
+                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+              }
+            }
+          }
+        }
+      },
+      "AlertListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "example": 50
+              },
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "pages": {
+                "type": "integer",
+                "example": 5
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertResponse/properties/data"
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Invalid credentials"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 401
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
+      "ReportListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "example": 50
+              },
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "example": 10
+              },
+              "pages": {
+                "type": "integer",
+                "example": 5
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+                },
+                "url": {
+                  "type": "string",
+                  "example": "https://example.com"
+                },
+                "completedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "summary": {
+                  "type": "object",
+                  "properties": {
+                    "overall": {
+                      "type": "integer",
+                      "example": 82
