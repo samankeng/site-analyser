@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: site-analyser-dev
+  labels:
+    name: site-analyser-dev
+    environment: development

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: site-analyser-config
+  namespace: site-analyser-dev
+data:
+  NODE_ENV: "development"
+  DEBUG: "true"
+  LOG_LEVEL: "INFO"
+  OLLAMA_MODEL: "llama2"
