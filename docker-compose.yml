@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - site-analyser-network
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://server:3000/api
+
+  # Backend service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+      - redis
+      - ai-service
+    networks:
+      - site-analyser-network
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongodb:27017/site-analyser
+      - REDIS_URL=redis://redis:6379
+      - AI_SERVICE_URL=http://ai-service:8000/api
+      - JWT_SECRET=your_jwt_secret_key_here
+      - SHODAN_API_KEY=${SHODAN_API_KEY}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+
+  # AI/ML service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-service:/app
+      - ./ai-service/models:/app/models
+    networks:
+      - site-analyser-network
+    environment:
+      - ENV=development
+      - DEBUG=True
+      - PORT=8000
+      - LOG_LEVEL=INFO
+      - API_KEY=${AI_SERVICE_API_KEY}
+      - CORS_ORIGINS=http://localhost,http://localhost:3000,http://client
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SHODAN_API_KEY=${SHODAN_API_KEY}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      - OLLAMA_ENDPOINT=http://ollama:11434/api/generate
+      - OLLAMA_MODEL=llama2
+
+  # Ollama LLM service
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - site-analyser-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # MongoDB database
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - site-analyser-network
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+
+  # Redis cache
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - site-analyser-network
+
+networks:
+  site-analyser-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+  redis-data:
+  ollama-data:
