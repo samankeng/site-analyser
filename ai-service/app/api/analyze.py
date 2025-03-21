@@ -3,8 +3,8 @@ from typing import List, Dict, Any, Optional
 import logging
 
 from app.schemas.analysis import (
-    SecurityAnalysisRequest,
-    SecurityAnalysisResponse
+    AnalysisRequest,
+    AnalysisResponse
 )
 from app.services.ai_analysis import generate_recommendations
 from app.services.threat_intelligence import get_threat_intelligence
@@ -18,12 +18,12 @@ router = APIRouter()
 
 @router.post(
     "/analyze",
-    response_model=SecurityAnalysisResponse,
+    response_model=AnalysisResponse,
     summary="Analyze security scan results",
     description="Analyze security scan results and provide AI-enhanced recommendations"
 )
 async def analyze_security_scan(
-    request: SecurityAnalysisRequest,
+    request: AnalysisRequest,
     background_tasks: BackgroundTasks
 ):
     """
@@ -56,7 +56,7 @@ async def analyze_security_scan(
         ai_analysis = await generate_recommendations(scan_data)
         
         # Prepare response
-        response = SecurityAnalysisResponse(
+        response = AnalysisResponse(
             recommendations=ai_analysis.get("recommendations", []),
             risk_assessment=ai_analysis.get("risk_assessment", ""),
             prioritized_actions=ai_analysis.get("prioritized_actions", []),

@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Grid, 
-  Typography, 
-  Paper, 
-  Button 
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { 
-  SecurityScoreCard, 
-  AlertsWidget, 
-  ScanHistoryTable, 
-  VulnerabilityChart 
-} from '../../components/dashboard';
+import { Container, Grid, Typography, Paper, Button } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import SecurityScoreCard from '../../components/security/SecurityScoreCard';
+import AlertsWidget from '../../components/dashboard/AlertsWidget';
+import ScanHistoryTable from '../../components/dashboard/ScanHistoryTable';
+import VulnerabilityChart from '../../components/dashboard/VulnerabilityChart';
+
 import useScan from '../../hooks/useScan';
 import useAuth from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAlertContext } from '../../contexts/AlertContext';
+import { useAlert } from '../../contexts/AlertContext';
 import { Link as RouterLink } from 'react-router-dom';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -46,7 +39,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { getRecentScans, loading } = useScan();
   const { mode, toggleThemeMode } = useTheme();
-  const { showAlert } = useAlertContext();
+  const { showAlert } = useAlert();
 
   const [recentScans, setRecentScans] = useState([]);
   const [securityScore, setSecurityScore] = useState(null);
@@ -62,10 +55,11 @@ const Dashboard = () => {
         // In a real app, this would come from backend
         const calculateSecurityScore = () => {
           if (!scans.length) return null;
-          
-          const vulnerabilityScore = scans.reduce((score, scan) => {
-            return score + (scan.vulnerabilityCount || 0);
-          }, 0) / scans.length;
+
+          const vulnerabilityScore =
+            scans.reduce((score, scan) => {
+              return score + (scan.vulnerabilityCount || 0);
+            }, 0) / scans.length;
 
           return Math.max(0, 100 - vulnerabilityScore * 10);
         };
@@ -82,15 +76,9 @@ const Dashboard = () => {
   return (
     <Container className={classes.root} maxWidth="xl">
       <div className={classes.headerContainer}>
-        <Typography variant="h4">
-          Welcome, {user?.firstName || 'User'}
-        </Typography>
+        <Typography variant="h4">Welcome, {user?.firstName || 'User'}</Typography>
         <div>
-          <Button 
-            variant="contained" 
-            color="secondary" 
-            onClick={toggleThemeMode}
-          >
+          <Button variant="contained" color="secondary" onClick={toggleThemeMode}>
             {mode === 'light' ? 'Dark Mode' : 'Light Mode'}
           </Button>
           <Button
@@ -109,10 +97,7 @@ const Dashboard = () => {
         {/* Security Score */}
         <Grid item xs={12} md={4}>
           <Paper className={classes.paper}>
-            <SecurityScoreCard 
-              score={securityScore} 
-              loading={loading}
-            />
+            <SecurityScoreCard score={securityScore} loading={loading} />
           </Paper>
         </Grid>
 
@@ -133,10 +118,7 @@ const Dashboard = () => {
         {/* Scan History */}
         <Grid item xs={12} md={6}>
           <Paper className={classes.paper}>
-            <ScanHistoryTable 
-              scans={recentScans} 
-              loading={loading}
-            />
+            <ScanHistoryTable scans={recentScans} loading={loading} />
           </Paper>
         </Grid>
       </Grid>

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useMemo, useContext, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import StyledEngineProvider from '../components/providers/StyledEngineProvider';
+import { ThemeProvider, createTheme } from '@mui/styles';
+import { CssBaseline } from '@mui/material';
 
 // Create a context for theme management
 const ThemeContext = createContext();
@@ -85,10 +86,10 @@ export const ThemeContextProvider = ({ children }) => {
 
   return (
     <ThemeContext.Provider value={{ mode, toggleThemeMode }}>
-      <ThemeProvider theme={theme}>
+      <StrictMode><StyledEngineProvider><ThemeProvider theme={theme}>
         <CssBaseline />
         {children}
-      </ThemeProvider>
+      </ThemeProvider></StyledEngineProvider></StrictMode>
     </ThemeContext.Provider>
   );
 };

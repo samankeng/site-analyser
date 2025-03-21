@@ -1,23 +1,25 @@
-version: '3.8'
-
 services:
-  # Frontend service
+  # Frontend service - optimized for production build
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://server:3000/api}
     ports:
       - "80:80"
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    depends_on:
-      - server
     networks:
       - site-analyser-network
-    environment:
-      - NODE_ENV=development
-      - REACT_APP_API_URL=http://server:3000/api
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
+    # Using bind mounts only in development
+    volumes:
+      - ./client/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - server
 
   # Backend service
   server:
@@ -26,24 +28,28 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-    depends_on:
-      - mongodb
-      - redis
-      - ai-service
     networks:
       - site-analyser-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
+    volumes:
+      # Map a local index.js file to the container
+      - ./server/index.js:/app/index.js
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3000
       - MONGODB_URI=mongodb://mongodb:27017/site-analyser
       - REDIS_URL=redis://redis:6379
       - AI_SERVICE_URL=http://ai-service:8000/api
-      - JWT_SECRET=your_jwt_secret_key_here
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
       - SHODAN_API_KEY=${SHODAN_API_KEY}
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+    depends_on:
+      - mongodb
+      - redis
 
   # AI/ML service
   ai-service:
@@ -52,23 +58,33 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - ./ai-service:/app
-      - ./ai-service/models:/app/models
     networks:
       - site-analyser-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+    volumes:
+      - ai-models:/app/models
+      # Add a volume mount for the logging module
+      - ./ai-service/app/core/logging.py:/app/app/core/logging.py
     environment:
-      - ENV=development
-      - DEBUG=True
+      - ENV=production
+      - DEBUG=False
       - PORT=8000
       - LOG_LEVEL=INFO
       - API_KEY=${AI_SERVICE_API_KEY}
-      - CORS_ORIGINS=http://localhost,http://localhost:3000,http://client
+      # Fix the CORS_ORIGINS format
+      #- CORS_ORIGINS=http://localhost,http://localhost:3000,http://client
+      - CORS_ORIGINS=["*"]
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SHODAN_API_KEY=${SHODAN_API_KEY}
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
       - OLLAMA_ENDPOINT=http://ollama:11434/api/generate
       - OLLAMA_MODEL=llama2
+    depends_on:
+      - ollama
 
   # Ollama LLM service
   ollama:
@@ -79,23 +95,33 @@ services:
       - ollama-data:/root/.ollama
     networks:
       - site-analyser-network
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_MODELS=/root/.ollama/models
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   # MongoDB database
   mongodb:
     image: mongo:latest
+    command: ["--wiredTigerCacheSizeGB", "0.5"]
     ports:
       - "27017:27017"
     volumes:
       - mongodb-data:/data/db
     networks:
       - site-analyser-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
@@ -103,12 +129,30 @@ services:
   # Redis cache
   redis:
     image: redis:alpine
+    command:
+      [
+        "redis-server",
+        "--save",
+        "60",
+        "1",
+        "--loglevel",
+        "warning",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
       - site-analyser-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256MB
 
 networks:
   site-analyser-network:
@@ -118,3 +162,4 @@ volumes:
   mongodb-data:
   redis-data:
   ollama-data:
+  ai-models:

@@ -8,8 +8,8 @@ from datetime import datetime
 
 from app.core.config import settings
 from app.core.security import verify_api_key
-from app.api.endpoints import analyze
-from app.schemas.common import HealthResponse
+from app.api import analyze
+from app.schemas.common import HealthStatus
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ async def root():
 # Health check endpoint
 @app.get(
     "/health",
-    response_model=HealthResponse,
+    response_model=HealthStatus,
     summary="Health check",
     description="Get service health status"
 )

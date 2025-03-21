@@ -13,13 +13,13 @@ import {
   Divider,
   CircularProgress
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import ErrorIcon from '@material-ui/icons/Error';
-import WarningIcon from '@material-ui/icons/Warning';
-import InfoIcon from '@material-ui/icons/Info';
-import SystemUpdateIcon from '@material-ui/icons/SystemUpdate';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import { makeStyles } from '@mui/styles';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../utils/formatters';
 

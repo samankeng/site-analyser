@@ -1,3 +1,4 @@
+# Option 2: Create a modified ai-service Dockerfile that replaces this file
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -11,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Copy requirements first for better layer caching
+# Copy requirements file
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,15 +25,14 @@ RUN pip install --no-cache-dir \
     httpx==0.24.1 \
     tenacity==8.2.3
 
-# Create model directory
-RUN mkdir -p /app/models
+# Create directory structure
+RUN mkdir -p /app/app/core
+
+# Create a fixed logging.py file
+RUN echo 'import logging\n\ndef setup_logging(level: str = "INFO"):\n    """Setup basic logging configuration."""\n    logging_level = getattr(logging, level.upper(), logging.INFO)\n    logging.basicConfig(\n        level=logging_level,\n        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",\n    )\n    return logging.getLogger("app")' > /app/app/core/logging.py
 
 # Copy application code
 COPY . .
-
-# Use the custom entrypoint script
-COPY ./docker/ai-service/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 # Expose the port
 EXPOSE 8000
@@ -41,8 +41,5 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# Run the entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
-
-# Default command
+# Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

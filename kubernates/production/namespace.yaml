@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: site-analyser-prod
+  labels:
+    name: site-analyser-prod
+    environment: production

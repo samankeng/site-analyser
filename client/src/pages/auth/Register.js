@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Link, 
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Link,
   Grid,
   FormControlLabel,
-  Checkbox
+  Checkbox,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@mui/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { useAlertContext } from '../../contexts/AlertContext';
-import { validateEmail, validatePassword } from '../../utils/validators';
+import { useAlert } from '../../contexts/AlertContext';
+import { isValidEmail as validateEmail, validatePassword } from '../../utils/validators';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     height: '100vh',
     display: 'flex',
@@ -45,7 +45,7 @@ const Register = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { showAlert } = useAlertContext();
+  const { showAlert } = useAlert();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -53,17 +53,17 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    termsAccepted: false
+    termsAccepted: false,
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -99,9 +99,9 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -111,11 +111,11 @@ const Register = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       };
 
       const success = await register(userData);
-      
+
       if (success) {
         showAlert('Registration successful', 'success');
         navigate('/dashboard');
@@ -245,11 +245,7 @@ const Register = () => {
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link 
-                component={RouterLink} 
-                to="/auth/login" 
-                variant="body2"
-              >
+              <Link component={RouterLink} to="/auth/login" variant="body2">
                 Already have an account? Sign in
               </Link>
             </Grid>

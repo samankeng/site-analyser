@@ -28,18 +28,18 @@ import {
   TextField,
   InputAdornment
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import WarningIcon from '@material-ui/icons/Warning';
-import InfoIcon from '@material-ui/icons/Info';
-import LockIcon from '@material-ui/icons/Lock';
-import SecurityIcon from '@material-ui/icons/Security';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import SearchIcon from '@material-ui/icons/Search';
-import HttpsIcon from '@material-ui/icons/Https';
-import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
+import { makeStyles } from '@mui/styles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import LockIcon from '@mui/icons-material/Lock';
+import SecurityIcon from '@mui/icons-material/Security';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import SearchIcon from '@mui/icons-material/Search';
+import HttpsIcon from '@mui/icons-material/Https';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 
 const useStyles = makeStyles((theme) => ({
   root: {

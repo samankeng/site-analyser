@@ -9,8 +9,8 @@ import {
   useMediaQuery,
   useTheme,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@mui/styles';
+import CloseIcon from '@mui/icons-material/Close';
 import Button from './Button';
 
 const useStyles = makeStyles((theme) => ({

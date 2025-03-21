@@ -20,16 +20,16 @@ import {
   Avatar,
   Tooltip,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import SecurityIcon from '@material-ui/icons/Security';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import AssessmentIcon from '@material-ui/icons/Assessment';
-import SettingsIcon from '@material-ui/icons/Settings';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import PersonIcon from '@material-ui/icons/Person';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import { makeStyles } from '@mui/styles';
+import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SecurityIcon from '@mui/icons-material/Security';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import PersonIcon from '@mui/icons-material/Person';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/actions/authActions';

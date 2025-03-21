@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Link, 
-  Grid 
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Container, Typography, TextField, Button, Paper, Link, Grid } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { useAlertContext } from '../../contexts/AlertContext';
+import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     height: '100vh',
     display: 'flex',
@@ -42,19 +34,19 @@ const Login = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { showAlert } = useAlertContext();
+  const { showAlert } = useAlert();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
     setLoading(true);
 
     try {
       const success = await login(email, password);
-      
+
       if (success) {
         showAlert('Login successful', 'success');
         navigate('/dashboard');
@@ -86,7 +78,7 @@ const Login = () => {
             autoComplete="email"
             autoFocus
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
           />
           <TextField
             variant="outlined"
@@ -99,7 +91,7 @@ const Login = () => {
             id="password"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
           />
           <Button
             type="submit"
@@ -113,20 +105,12 @@ const Login = () => {
           </Button>
           <Grid container>
             <Grid item xs>
-              <Link 
-                component={RouterLink} 
-                to="/auth/reset-password" 
-                variant="body2"
-              >
+              <Link component={RouterLink} to="/auth/reset-password" variant="body2">
                 Forgot password?
               </Link>
             </Grid>
             <Grid item>
-              <Link 
-                component={RouterLink} 
-                to="/auth/register" 
-                variant="body2"
-              >
+              <Link component={RouterLink} to="/auth/register" variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
             </Grid>

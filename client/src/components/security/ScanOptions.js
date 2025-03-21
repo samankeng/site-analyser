@@ -17,17 +17,17 @@ import {
   Divider,
   useMediaQuery
 } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import InfoIcon from '@material-ui/icons/Info';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import SecurityIcon from '@material-ui/icons/Security';
-import LockIcon from '@material-ui/icons/Lock';
-import LanguageIcon from '@material-ui/icons/Language';
-import BugReportIcon from '@material-ui/icons/BugReport';
-import CodeIcon from '@material-ui/icons/Code';
-import SpeedIcon from '@material-ui/icons/Speed';
-import WifiIcon from '@material-ui/icons/Wifi';
+import { makeStyles, useTheme } from '@mui/styles';
+import InfoIcon from '@mui/icons-material/Info';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import SecurityIcon from '@mui/icons-material/Security';
+import LockIcon from '@mui/icons-material/Lock';
+import LanguageIcon from '@mui/icons-material/Language';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import CodeIcon from '@mui/icons-material/Code';
+import SpeedIcon from '@mui/icons-material/Speed';
+import WifiIcon from '@mui/icons-material/Wifi';
 
 const useStyles = makeStyles((theme) => ({
   root: {

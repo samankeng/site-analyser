@@ -15,14 +15,14 @@ import {
   Button,
   CircularProgress
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import WarningIcon from '@material-ui/icons/Warning';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
-import BugReportIcon from '@material-ui/icons/BugReport';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import AssessmentIcon from '@material-ui/icons/Assessment';
-import LightbulbOutlinedIcon from '@material-ui/icons/LightbulbOutlined';
+import { makeStyles } from '@mui/styles';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 
 const useStyles = makeStyles((theme) => ({
   root: {

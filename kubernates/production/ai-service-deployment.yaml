@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+  namespace: site-analyser-prod
+  labels:
+    app: ai-service
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+        environment: production
+    spec:
+      containers:
+      - name: ai-service
+        image: ${REGISTRY_URL}/site-analyser/ai-service:${IMAGE_TAG}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        env:
+        - name: ENV
+          value: "production"
+        - name: DEBUG
+          value: "False"
+        - name: PORT
+          value: "8000"
+        - name: LOG_LEVEL
+          value: "WARNING"
+        - name: CORS_ORIGINS
+          value: "https://site-analyser.example.com,https://api.site-analyser.example.com"
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: ai_service_api_key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: openai_api_key
+        - name: SHODAN_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: shodan_api_key
+        - name: VIRUSTOTAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: virustotal_api_key
+        - name: OLLAMA_ENDPOINT
+          value: "http://ollama-service:11434/api/generate"
+        - name: OLLAMA_MODEL
+          value: "llama2"
+        volumeMounts:
+        - name: models-storage
+          mountPath: /app/models
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+      volumes:
+      - name: models-storage
+        persistentVolumeClaim:
+          claimName: models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service-service
+  namespace: site-analyser-prod
+spec:
+  selector:
+    app: ai-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: models-pvc
+  namespace: site-analyser-prod
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: managed-nfs-storage
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-service-hpa
+  namespace: site-analyser-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

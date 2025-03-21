@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  startScanAction, 
-  cancelScanAction, 
-  fetchScanResultsAction 
+import {
+  initiateScan as startScanAction,
+  cancelScan as cancelScanAction,
+  getScanResults as fetchScanResultsAction,
 } from '../store/actions/scanActions';
 
 /**
@@ -12,45 +12,49 @@ import {
  */
 const useScan = () => {
   const dispatch = useDispatch();
-  const { 
-    currentScan, 
-    scanHistory, 
-    loading, 
-    error 
-  } = useSelector(state => state.scans);
+  const { currentScan, scanHistory, loading, error } = useSelector(state => state.scans);
 
   // Start a new scan
-  const startScan = useCallback(async (url, options = {}) => {
-    try {
-      const scan = await dispatch(startScanAction(url, options));
-      return scan;
-    } catch (err) {
-      console.error('Scan initiation failed', err);
-      return null;
-    }
-  }, [dispatch]);
+  const startScan = useCallback(
+    async (url, options = {}) => {
+      try {
+        const scan = await dispatch(startScanAction(url, options));
+        return scan;
+      } catch (err) {
+        console.error('Scan initiation failed', err);
+        return null;
+      }
+    },
+    [dispatch]
+  );
 
   // Cancel an ongoing scan
-  const cancelScan = useCallback(async (scanId) => {
-    try {
-      await dispatch(cancelScanAction(scanId));
-      return true;
-    } catch (err) {
-      console.error('Scan cancellation failed', err);
-      return false;
-    }
-  }, [dispatch]);
+  const cancelScan = useCallback(
+    async scanId => {
+      try {
+        await dispatch(cancelScanAction(scanId));
+        return true;
+      } catch (err) {
+        console.error('Scan cancellation failed', err);
+        return false;
+      }
+    },
+    [dispatch]
+  );
 
   // Fetch scan results
-  const fetchScanResults = useCallback(async (scanId) => {
-    try {
-      const results = await dispatch(fetchScanResultsAction(scanId));
-      return results;
-    } catch (err) {
-      console.error('Fetching scan results failed', err);
-      return null;
-    }
-  }, [dispatch]);
+  const fetchScanResults = useCallback(
+    async scanId => {
+      try {
+        const results = await dispatch(fetchScanResultsAction(scanId));
+        return results;
+      } catch (err) {
+        console.error('Fetching scan results failed', err);
+        return null;
+      }
+    },
+    [dispatch]
+  );
 
   // Real-time scan progress tracking
   const [scanProgress, setScanProgress] = useState(null);
@@ -63,7 +67,7 @@ const useScan = () => {
         // In a real app, this would come from backend
         setScanProgress({
           progress: currentScan.progress,
-          status: currentScan.status
+          status: currentScan.status,
         });
       }, 5000);
 
@@ -72,9 +76,12 @@ const useScan = () => {
   }, [currentScan]);
 
   // List recent scans
-  const getRecentScans = useCallback((limit = 10) => {
-    return scanHistory.slice(0, limit);
-  }, [scanHistory]);
+  const getRecentScans = useCallback(
+    (limit = 10) => {
+      return scanHistory.slice(0, limit);
+    },
+    [scanHistory]
+  );
 
   return {
     // Current scan state
@@ -92,7 +99,7 @@ const useScan = () => {
     // Scan operations
     startScan,
     cancelScan,
-    fetchScanResults
+    fetchScanResults,
   };
 };
 

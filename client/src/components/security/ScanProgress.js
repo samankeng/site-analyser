@@ -15,17 +15,17 @@ import {
   StepContent,
   useMediaQuery
 } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import CancelIcon from '@material-ui/icons/Cancel';
-import LockIcon from '@material-ui/icons/Lock';
-import LanguageIcon from '@material-ui/icons/Language';
-import BugReportIcon from '@material-ui/icons/BugReport';
-import WifiIcon from '@material-ui/icons/Wifi';
-import CodeIcon from '@material-ui/icons/Code';
-import SpeedIcon from '@material-ui/icons/Speed';
-import WarningIcon from '@material-ui/icons/Warning';
+import { makeStyles, useTheme } from '@mui/styles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import CancelIcon from '@mui/icons-material/Cancel';
+import LockIcon from '@mui/icons-material/Lock';
+import LanguageIcon from '@mui/icons-material/Language';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import WifiIcon from '@mui/icons-material/Wifi';
+import CodeIcon from '@mui/icons-material/Code';
+import SpeedIcon from '@mui/icons-material/Speed';
+import WarningIcon from '@mui/icons-material/Warning';
 import { formatDuration } from '../../utils/formatters';
 
 const useStyles = makeStyles((theme) => ({

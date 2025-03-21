@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Paper, Typography, Box, Button, CircularProgress } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import {
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  Button,
+  CircularProgress,
+} from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchDashboardData } from '../store/actions/dashboardActions';
 import SecurityScoreCard from '../components/dashboard/SecurityScoreCard';
 import VulnerabilityChart from '../components/dashboard/VulnerabilityChart';
 import ScanHistoryTable from '../components/dashboard/ScanHistoryTable';
 import AlertsWidget from '../components/dashboard/AlertsWidget';
-import ScanForm from '../components/security/ScanForm';
+import ScanForm from '../security/ScanForm';
 import { useAuth } from '../contexts/AuthContext';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -44,20 +52,16 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const { user } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
-  
-  const { 
-    loading, 
-    securityScore, 
-    vulnerabilities, 
-    recentScans, 
-    alerts 
-  } = useSelector((state) => state.dashboard);
+
+  const { loading, securityScore, vulnerabilities, recentScans, alerts } = useSelector(
+    state => state.dashboard
+  );
 
   useEffect(() => {
     dispatch(fetchDashboardData());
   }, [dispatch]);
 
-  const handleNewScan = async (scanData) => {
+  const handleNewScan = async scanData => {
     setIsScanning(true);
     // Implement scan logic here
     setTimeout(() => {
@@ -80,25 +84,20 @@ const Dashboard = () => {
       <Typography variant="h4" className={classes.title}>
         Security Dashboard
       </Typography>
-      
+
       <Grid container spacing={3}>
         {/* Security Score */}
         <Grid item xs={12} md={4}>
           <Paper className={classes.paper}>
             <SecurityScoreCard score={securityScore} />
             <Box className={classes.actionButton}>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                fullWidth
-                onClick={() => {}}
-              >
+              <Button variant="contained" color="primary" fullWidth onClick={() => {}}>
                 View Full Report
               </Button>
             </Box>
           </Paper>
         </Grid>
-        
+
         {/* Vulnerability Distribution */}
         <Grid item xs={12} md={8}>
           <Paper className={classes.paper}>
@@ -108,7 +107,7 @@ const Dashboard = () => {
             <VulnerabilityChart data={vulnerabilities} />
           </Paper>
         </Grid>
-        
+
         {/* New Scan */}
         <Grid item xs={12}>
           <Paper className={classes.paper}>
@@ -118,7 +117,7 @@ const Dashboard = () => {
             <ScanForm onSubmit={handleNewScan} isLoading={isScanning} />
           </Paper>
         </Grid>
-        
+
         {/* Recent Scans */}
         <Grid item xs={12} md={8}>
           <Paper className={classes.paper}>
@@ -128,7 +127,7 @@ const Dashboard = () => {
             <ScanHistoryTable scans={recentScans} />
           </Paper>
         </Grid>
-        
+
         {/* Alerts */}
         <Grid item xs={12} md={4}>
           <Paper className={classes.paper}>

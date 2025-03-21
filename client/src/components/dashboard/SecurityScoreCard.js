@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box, Typography, CircularProgress, Tooltip } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import InfoIcon from '@material-ui/icons/Info';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import WarningIcon from '@material-ui/icons/Warning';
-import ErrorIcon from '@material-ui/icons/Error';
+import { Box, Typography, CircularProgress, Tooltip } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const useStyles = makeStyles((theme) => ({
   root: {

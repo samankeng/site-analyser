@@ -1,19 +1,13 @@
-import React, { useState } from "react";
-import {
-  Container,
-  Typography,
-  Grid,
-  Paper,
-  Button,
-  Divider,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { useNavigate } from "react-router-dom";
-import { ScanForm, ScanOptions } from "../../components/security";
-import useScan from "../../hooks/useScan";
-import { useAlertContext } from "../../contexts/AlertContext";
+import React, { useState } from 'react';
+import { Container, Typography, Grid, Paper, Button, Divider } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { useNavigate } from 'react-router-dom';
+import ScanForm from '../../components/security/ScanForm';
+import ScanOptions from '../../components/security/ScanOptions';
+import useScan from '../../hooks/useScan';
+import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(4),
   },
@@ -28,8 +22,8 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0),
   },
   actionButtons: {
-    display: "flex",
-    justifyContent: "space-between",
+    display: 'flex',
+    justifyContent: 'space-between',
     marginTop: theme.spacing(3),
   },
 }));
@@ -38,7 +32,7 @@ const NewScan = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const { startScan } = useScan();
-  const { showAlert } = useAlertContext();
+  const { showAlert } = useAlert();
 
   const [scanOptions, setScanOptions] = useState({
     deepScan: false,
@@ -48,25 +42,25 @@ const NewScan = () => {
     checkVulnerabilities: true,
   });
 
-  const handleOptionChange = (option) => {
-    setScanOptions((prev) => ({
+  const handleOptionChange = option => {
+    setScanOptions(prev => ({
       ...prev,
       [option]: !prev[option],
     }));
   };
 
-  const handleScanStart = async (url) => {
+  const handleScanStart = async url => {
     try {
       const scanResult = await startScan(url, scanOptions);
 
       if (scanResult) {
-        showAlert("Scan initiated successfully", "success");
+        showAlert('Scan initiated successfully', 'success');
         navigate(`/scans/${scanResult.id}`);
       } else {
-        showAlert("Failed to start scan", "error");
+        showAlert('Failed to start scan', 'error');
       }
     } catch (error) {
-      showAlert("An error occurred while starting the scan", "error");
+      showAlert('An error occurred while starting the scan', 'error');
     }
   };
 
@@ -81,11 +75,7 @@ const NewScan = () => {
           <Typography variant="h6" gutterBottom>
             Scan Target
           </Typography>
-          <ScanForm
-            onScanStart={handleScanStart}
-            fullWidth
-            variant="outlined"
-          />
+          <ScanForm onScanStart={handleScanStart} fullWidth variant="outlined" />
         </section>
 
         <Divider className={classes.divider} />
@@ -96,10 +86,7 @@ const NewScan = () => {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <ScanOptions
-                options={scanOptions}
-                onOptionChange={handleOptionChange}
-              />
+              <ScanOptions options={scanOptions} onOptionChange={handleOptionChange} />
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="body2" color="textSecondary">
@@ -117,11 +104,7 @@ const NewScan = () => {
         </section>
 
         <div className={classes.actionButtons}>
-          <Button
-            variant="outlined"
-            color="default"
-            onClick={() => navigate("/dashboard")}
-          >
+          <Button variant="outlined" color="default" onClick={() => navigate('/dashboard')}>
             Cancel
           </Button>
           <Button

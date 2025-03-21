@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  loginAction, 
-  logoutAction, 
-  registerAction, 
-  resetPasswordAction 
+import {
+  login as loginAction,
+  logout as logoutAction,
+  register as registerAction,
+  resetPassword as resetPasswordAction,
 } from '../store/actions/authActions';
 
 /**
@@ -13,23 +13,21 @@ import {
  */
 const useAuth = () => {
   const dispatch = useDispatch();
-  const { 
-    user, 
-    isAuthenticated, 
-    loading, 
-    error 
-  } = useSelector(state => state.auth);
+  const { user, isAuthenticated, loading, error } = useSelector(state => state.auth);
 
   // Login method
-  const login = useCallback(async (email, password) => {
-    try {
-      await dispatch(loginAction(email, password));
-      return true;
-    } catch (err) {
-      console.error('Login failed', err);
-      return false;
-    }
-  }, [dispatch]);
+  const login = useCallback(
+    async (email, password) => {
+      try {
+        await dispatch(loginAction(email, password));
+        return true;
+      } catch (err) {
+        console.error('Login failed', err);
+        return false;
+      }
+    },
+    [dispatch]
+  );
 
   // Logout method
   const logout = useCallback(async () => {
@@ -43,26 +41,32 @@ const useAuth = () => {
   }, [dispatch]);
 
   // Register method
-  const register = useCallback(async (userData) => {
-    try {
-      await dispatch(registerAction(userData));
-      return true;
-    } catch (err) {
-      console.error('Registration failed', err);
-      return false;
-    }
-  }, [dispatch]);
+  const register = useCallback(
+    async userData => {
+      try {
+        await dispatch(registerAction(userData));
+        return true;
+      } catch (err) {
+        console.error('Registration failed', err);
+        return false;
+      }
+    },
+    [dispatch]
+  );
 
   // Reset password method
-  const resetPassword = useCallback(async (email) => {
-    try {
-      await dispatch(resetPasswordAction(email));
-      return true;
-    } catch (err) {
-      console.error('Password reset failed', err);
-      return false;
-    }
-  }, [dispatch]);
+  const resetPassword = useCallback(
+    async email => {
+      try {
+        await dispatch(resetPasswordAction(email));
+        return true;
+      } catch (err) {
+        console.error('Password reset failed', err);
+        return false;
+      }
+    },
+    [dispatch]
+  );
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -77,7 +81,7 @@ const useAuth = () => {
     login,
     logout,
     register,
-    resetPassword
+    resetPassword,
   };
 };
 

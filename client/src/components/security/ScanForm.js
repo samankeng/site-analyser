@@ -17,9 +17,9 @@ import {
   Divider,
   useMediaQuery
 } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import InfoIcon from '@material-ui/icons/Info';
-import SecurityIcon from '@material-ui/icons/Security';
+import { makeStyles, useTheme } from '@mui/styles';
+import InfoIcon from '@mui/icons-material/Info';
+import SecurityIcon from '@mui/icons-material/Security';
 import { isValidUrl } from '../../utils/validators';
 import ScanOptions from './ScanOptions';
 import { useLocation } from 'react-router-dom';

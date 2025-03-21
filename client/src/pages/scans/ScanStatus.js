@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Grid, 
-  Paper, 
-  Button,
-  Tabs,
-  Tab,
-  Box
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Container, Typography, Grid, Paper, Button, Tabs, Tab, Box } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { useParams, useNavigate } from 'react-router-dom';
 
-import { 
-  ScanProgress, 
-  SecurityScoreCard 
-} from '../../components/security';
-import { 
-  HeaderAnalysis, 
-  SslAnalysis, 
-  VulnerabilityList, 
-  AiRecommendations 
-} from '../../components/reports';
+import ScanProgress from '../../components/security/ScanProgress';
+import SecurityScoreCard from '../../components/security/SecurityScoreCard';
+import HeaderAnalysis from '../../components/reports/HeaderAnalysis';
+import SslAnalysis from '../../components/reports/SslAnalysis';
+import VulnerabilityList from '../../components/reports/VulnerabilityList';
+import AiRecommendations from '../../components/reports/AiRecommendations';
 
 import useScan from '../../hooks/useScan';
-import { useAlertContext } from '../../contexts/AlertContext';
+import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(4),
   },
@@ -43,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: theme.spacing(3),
-  }
+  },
 }));
 
 function TabPanel(props) {
@@ -58,11 +45,7 @@ function TabPanel(props) {
       {...other}
       style={{ width: '100%' }}
     >
-      {value === index && (
-        <Box p={3}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box p={3}>{children}</Box>}
     </div>
   );
 }
@@ -71,12 +54,8 @@ const ScanStatus = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const { scanId } = useParams();
-  const { 
-    fetchScanResults, 
-    currentScan, 
-    cancelScan 
-  } = useScan();
-  const { showAlert } = useAlertContext();
+  const { fetchScanResults, currentScan, cancelScan } = useScan();
+  const { showAlert } = useAlert();
 
   const [tabValue, setTabValue] = useState(0);
   const [scanResults, setScanResults] = useState(null);
@@ -127,18 +106,14 @@ const ScanStatus = () => {
             </Typography>
           )}
         </Typography>
-        <Button 
-          variant="outlined" 
-          color="primary"
-          onClick={() => navigate('/scans/new')}
-        >
+        <Button variant="outlined" color="primary" onClick={() => navigate('/scans/new')}>
           New Scan
         </Button>
       </div>
 
       {/* Scan Progress Indicator */}
-      <ScanProgress 
-        scan={currentScan} 
+      <ScanProgress
+        scan={currentScan}
         onCancel={handleCancelScan}
         onViewResults={() => {}}
         onNewScan={() => navigate('/scans/new')}
@@ -149,8 +124,8 @@ const ScanStatus = () => {
         <>
           <Grid container spacing={3} style={{ marginTop: 16 }}>
             <Grid item xs={12} md={4}>
-              <SecurityScoreCard 
-                score={scanResults?.securityScore} 
+              <SecurityScoreCard
+                score={scanResults?.securityScore}
                 details={scanResults?.scoreDetails}
               />
             </Grid>
@@ -169,41 +144,31 @@ const ScanStatus = () => {
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
-                  <VulnerabilityList 
-                    vulnerabilities={scanResults?.vulnerabilities} 
-                  />
+                  <VulnerabilityList vulnerabilities={scanResults?.vulnerabilities} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <HeaderAnalysis 
-                    headers={scanResults?.headers} 
-                  />
+                  <HeaderAnalysis headers={scanResults?.headers} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                  <SslAnalysis 
-                    sslDetails={scanResults?.sslAnalysis} 
-                  />
+                  <SslAnalysis sslDetails={scanResults?.sslAnalysis} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={3}>
-                  <AiRecommendations 
-                    recommendations={scanResults?.aiRecommendations} 
-                  />
+                  <AiRecommendations recommendations={scanResults?.aiRecommendations} />
                 </TabPanel>
               </Paper>
             </Grid>
           </Grid>
 
           <div className={classes.actionButtons}>
-            <Button 
-              variant="outlined" 
-              color="default"
-              onClick={() => navigate('/dashboard')}
-            >
+            <Button variant="outlined" color="default" onClick={() => navigate('/dashboard')}>
               Back to Dashboard
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               color="primary"
-              onClick={() => {/* Export Report */}}
+              onClick={() => {
+                /* Export Report */
+              }}
             >
               Export Full Report
             </Button>

@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Button, 
-  Grid, 
-  Paper, 
-  TextField 
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Container, Typography, Button, Grid, Paper, TextField } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import SecurityIcon from '@material-ui/icons/Security';
-import SpeedIcon from '@material-ui/icons/Speed';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import { ScanForm } from '../../components/security';
+import SecurityIcon from '@mui/icons-material/Security';
+import SpeedIcon from '@mui/icons-material/Speed';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import ScanForm from '../components/security/ScanForm';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     minHeight: '100vh',
     display: 'flex',
@@ -65,21 +58,22 @@ const HomePage = () => {
     {
       icon: <SecurityIcon className={classes.featureIcon} />,
       title: 'Comprehensive Security Scanning',
-      description: 'Analyze websites for vulnerabilities, SSL/TLS issues, and potential security risks.'
+      description:
+        'Analyze websites for vulnerabilities, SSL/TLS issues, and potential security risks.',
     },
     {
       icon: <SpeedIcon className={classes.featureIcon} />,
       title: 'Performance Insights',
-      description: 'Get detailed performance metrics and optimization recommendations.'
+      description: 'Get detailed performance metrics and optimization recommendations.',
     },
     {
       icon: <BarChartIcon className={classes.featureIcon} />,
       title: 'Detailed Reporting',
-      description: 'Receive comprehensive reports with actionable security insights.'
-    }
+      description: 'Receive comprehensive reports with actionable security insights.',
+    },
   ];
 
-  const handleScanComplete = (scanResult) => {
+  const handleScanComplete = scanResult => {
     // Navigate to scan results page
     navigate(`/scans/${scanResult.id}`);
   };
@@ -88,26 +82,15 @@ const HomePage = () => {
     <Container maxWidth="lg" className={classes.root}>
       {/* Hero Section */}
       <section className={classes.heroSection}>
-        <Typography 
-          variant="h2" 
-          className={classes.headline} 
-          color="primary"
-        >
+        <Typography variant="h2" className={classes.headline} color="primary">
           Secure Your Web Presence
         </Typography>
-        <Typography 
-          variant="h5" 
-          className={classes.subheadline}
-        >
+        <Typography variant="h5" className={classes.subheadline}>
           Advanced Security Scanning and Analysis
         </Typography>
-        
+
         {/* Scan Form */}
-        <ScanForm 
-          onScanComplete={handleScanComplete}
-          variant="outlined"
-          fullWidth
-        />
+        <ScanForm onScanComplete={handleScanComplete} variant="outlined" fullWidth />
       </section>
 
       {/* Features Section */}

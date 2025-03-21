@@ -5,9 +5,9 @@ import {
   Button, 
   Paper 
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@mui/styles';
 import { Link as RouterLink } from 'react-router-dom';
-import SearchOffIcon from '@material-ui/icons/SearchOff';
+import SearchOffIcon from '@mui/icons-material/SearchOff';
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -16,13 +16,13 @@ import {
   Button,
   useMediaQuery
 } from '@material-ui/core';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import ErrorIcon from '@material-ui/icons/Error';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
-import CancelIcon from '@material-ui/icons/Cancel';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import { makeStyles, useTheme } from '@mui/styles';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useNavigate } from 'react-router-dom';
 import { formatDate, getDomainAndPath } from '../../utils/formatters';
 

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Typography, Breadcrumbs, Box, Paper, Button, Divider } from '@material-ui/core';
+import { Typography, Breadcrumbs, Box, Paper, Button, Divider } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import HomeIcon from '@material-ui/icons/Home';
+import { makeStyles } from '@mui/styles';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import HomeIcon from '@mui/icons-material/Home';
 
 const useStyles = makeStyles((theme) => ({
   root: {
