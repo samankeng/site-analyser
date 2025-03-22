@@ -1,42 +1,73 @@
-import React, { lazy, Suspense } from 'react';
-import { 
-  BrowserRouter as Router, 
-  Routes, 
-  Route, 
-  Navigate 
-} from 'react-router-dom';
+import React, { lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Suspense } from 'react';
 
 // Import common components
-import { Loader } from './components/common';
+import { CircularProgress } from '@mui/material';
+import Box from '@mui/material/Box';
 import PrivateRoute from './components/common/PrivateRoute';
 
+// Custom loader component using MUI v6
+const Loader = ({ fullScreen = false }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: fullScreen ? '100vh' : '100%',
+      width: '100%',
+      minHeight: fullScreen ? undefined : '200px',
+    }}
+  >
+    <CircularProgress color="primary" />
+  </Box>
+);
+
+// Layout components for nested routes
+const SettingsLayout = () => (
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2 }}>
+    <h1>Settings</h1>
+    <Outlet />
+  </Box>
+);
+
+// Lazy load pages with improved error handling for React 19
+const lazyWithRetry = importFn => {
+  return lazy(() =>
+    importFn().catch(error => {
+      console.error('Error loading component:', error);
+      return import('./pages/ErrorPage');
+    })
+  );
+};
+
 // Lazy load pages for performance
-const HomePage = lazy(() => import('./pages/HomePage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const ErrorPage = lazy(() => import('./pages/ErrorPage'));
+const HomePage = lazyWithRetry(() => import('./pages/HomePage'));
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'));
+const ErrorPage = lazyWithRetry(() => import('./pages/ErrorPage'));
 
 // Auth Pages
-const Login = lazy(() => import('./pages/auth/Login'));
-const Register = lazy(() => import('./pages/auth/Register'));
-const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
+const Login = lazyWithRetry(() => import('./pages/auth/Login'));
+const Register = lazyWithRetry(() => import('./pages/auth/Register'));
+const ResetPassword = lazyWithRetry(() => import('./pages/auth/ResetPassword'));
 
 // Dashboard & Account Pages
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
-const AccountSettings = lazy(() => import('./pages/settings/Account'));
-const NotificationSettings = lazy(() => import('./pages/settings/Notifications'));
-const SecuritySettings = lazy(() => import('./pages/settings/Security'));
+const Dashboard = lazyWithRetry(() => import('./pages/dashboard/Dashboard'));
+const AccountSettings = lazyWithRetry(() => import('./pages/settings/Account'));
+const NotificationSettings = lazyWithRetry(() => import('./pages/settings/Notifications'));
+const SecuritySettings = lazyWithRetry(() => import('./pages/settings/Security'));
 
 // Scan Pages
-const NewScan = lazy(() => import('./pages/scans/NewScan'));
-const ScanStatus = lazy(() => import('./pages/scans/ScanStatus'));
+const NewScan = lazyWithRetry(() => import('./pages/scans/NewScan'));
+const ScanStatus = lazyWithRetry(() => import('./pages/scans/ScanStatus'));
 
 // Report Pages
-const ReportList = lazy(() => import('./pages/reports/ReportList'));
-const SecurityReport = lazy(() => import('./pages/reports/SecurityReport'));
+const ReportList = lazyWithRetry(() => import('./pages/reports/ReportList'));
+const SecurityReport = lazyWithRetry(() => import('./pages/reports/SecurityReport'));
 
 /**
  * Application Routing Configuration
- * Defines all routes with lazy loading and authentication checks
+ * Updated for React 19 and MUI v6 with improved pattern
  */
 const AppRoutes = () => {
   return (
@@ -50,80 +81,35 @@ const AppRoutes = () => {
           <Route path="/auth/reset-password" element={<ResetPassword />} />
 
           {/* Protected Dashboard Routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            } 
-          />
+          <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
 
-          {/* Protected Scan Routes */}
-          <Route 
-            path="/scans/new" 
-            element={
-              <PrivateRoute>
-                <NewScan />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/scans/:scanId" 
-            element={
-              <PrivateRoute>
-                <ScanStatus />
-              </PrivateRoute>
-            } 
-          />
+          {/* Protected Scan Routes - Grouped */}
+          <Route path="/scans">
+            <Route path="new" element={<PrivateRoute element={<NewScan />} />} />
+            <Route path=":scanId" element={<PrivateRoute element={<ScanStatus />} />} />
+            {/* Redirect /scans to /scans/new */}
+            <Route index element={<Navigate to="/scans/new" replace />} />
+          </Route>
 
-          {/* Protected Report Routes */}
-          <Route 
-            path="/reports" 
-            element={
-              <PrivateRoute>
-                <ReportList />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/reports/:reportId" 
-            element={
-              <PrivateRoute>
-                <SecurityReport />
-              </PrivateRoute>
-            } 
-          />
+          {/* Protected Report Routes - Grouped */}
+          <Route path="/reports">
+            <Route index element={<PrivateRoute element={<ReportList />} />} />
+            <Route path=":reportId" element={<PrivateRoute element={<SecurityReport />} />} />
+          </Route>
 
-          {/* Protected Settings Routes */}
-          <Route 
-            path="/settings/account" 
-            element={
-              <PrivateRoute>
-                <AccountSettings />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/settings/notifications" 
-            element={
-              <PrivateRoute>
-                <NotificationSettings />
-              </PrivateRoute>
-            } 
-          />
-          <Route 
-            path="/settings/security" 
-            element={
-              <PrivateRoute>
-                <SecuritySettings />
-              </PrivateRoute>
-            } 
-          />
+          {/* Protected Settings Routes with Layout */}
+          <Route path="/settings" element={<PrivateRoute element={<SettingsLayout />} />}>
+            <Route path="account" element={<AccountSettings />} />
+            <Route path="notifications" element={<NotificationSettings />} />
+            <Route path="security" element={<SecuritySettings />} />
+            {/* Default settings page */}
+            <Route index element={<Navigate to="/settings/account" replace />} />
+          </Route>
 
           {/* Error Handling Routes */}
           <Route path="/error" element={<ErrorPage />} />
-          
+          <Route path="/unauthorized" element={<ErrorPage />} />
+
           {/* 404 Route - Always keep this last */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -134,5 +120,13 @@ const AppRoutes = () => {
 
 export default AppRoutes;
 
-// Utility function for redirecting
-export const redirectTo = (path) => <Navigate to={path} replace />;
+/**
+ * Utility function for programmatic navigation
+ * @param {string} path - Path to redirect to
+ * @param {Object} options - Optional navigation options
+ * @returns {JSX.Element} - Navigate component
+ */
+export const redirectTo = (path, options = {}) => {
+  const { replace = true, state = null } = options;
+  return <Navigate to={path} replace={replace} state={state} />;
+};

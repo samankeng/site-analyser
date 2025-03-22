@@ -1,0 +1,20 @@
+# Development stage only
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package.json ./
+
+# Use npm install instead of npm ci to resolve dependency issues
+RUN npm install
+
+# Copy all client files
+COPY . ./
+
+# Expose development server port
+EXPOSE 4000
+
+# Command to start development server
+CMD ["npm", "start"]

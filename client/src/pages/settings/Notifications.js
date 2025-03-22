@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
@@ -181,7 +181,7 @@ const Notifications = () => {
           Notification Settings
         </Typography>
         <Button
-          variant="contained"
+          variant="filled"
           color="primary"
           startIcon={<SaveIcon />}
           onClick={handleSaveSettings}
@@ -190,7 +190,7 @@ const Notifications = () => {
         </Button>
       </Box>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           Email Notifications
         </Typography>
@@ -294,7 +294,7 @@ const Notifications = () => {
               disabled={!settings.emailNotifications}
             />
             <Button
-              variant="contained"
+              variant="filled"
               startIcon={<AddIcon />}
               onClick={handleAddEmail}
               disabled={!settings.emailNotifications}
@@ -323,7 +323,7 @@ const Notifications = () => {
         </Box>
       </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           Integration Channels
         </Typography>
@@ -387,7 +387,7 @@ const Notifications = () => {
         </Grid>
       </Paper>
 
-      <Paper sx={{ p: 3 }}>
+      <Paper elevation={2} sx={{ p: 3 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           Custom Notification Rules
         </Typography>
@@ -444,7 +444,7 @@ const Notifications = () => {
             <Grid item xs={12} sm={2}>
               <Button
                 fullWidth
-                variant="contained"
+                variant="filled"
                 startIcon={<AddIcon />}
                 onClick={handleAddCustomNotification}
               >
@@ -512,7 +512,7 @@ const Notifications = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>

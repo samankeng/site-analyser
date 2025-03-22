@@ -1,40 +1,41 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Container, Typography, TextField, Button, Paper, Link, Grid } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.palette.background.default,
-  },
-  paper: {
-    padding: theme.spacing(4),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    maxWidth: 400,
-    width: '100%',
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: theme.palette.background.default,
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  maxWidth: 400,
+  width: '100%',
+}));
+
+const StyledForm = styled('form')(({ theme }) => ({
+  width: '100%',
+  marginTop: theme.spacing(1),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(3, 0, 2),
 }));
 
 const Login = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { showAlert } = useAlert();
+  const { addAlert } = useAlert(); // Updated to use addAlert instead of showAlert
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,25 +49,25 @@ const Login = () => {
       const success = await login(email, password);
 
       if (success) {
-        showAlert('Login successful', 'success');
+        addAlert('Login successful', 'success');
         navigate('/dashboard');
       } else {
-        showAlert('Invalid credentials', 'error');
+        addAlert('Invalid credentials', 'error');
       }
     } catch (error) {
-      showAlert('Login failed', 'error');
+      addAlert('Login failed', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs" className={classes.root}>
-      <Paper elevation={6} className={classes.paper}>
+    <StyledContainer component="main" maxWidth="xs">
+      <StyledPaper elevation={6}>
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} onSubmit={handleSubmit}>
+        <StyledForm onSubmit={handleSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -93,16 +94,15 @@ const Login = () => {
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
-          <Button
+          <SubmitButton
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            className={classes.submit}
             disabled={loading}
           >
             {loading ? 'Signing In...' : 'Sign In'}
-          </Button>
+          </SubmitButton>
           <Grid container>
             <Grid item xs>
               <Link component={RouterLink} to="/auth/reset-password" variant="body2">
@@ -115,9 +115,9 @@ const Login = () => {
               </Link>
             </Grid>
           </Grid>
-        </form>
-      </Paper>
-    </Container>
+        </StyledForm>
+      </StyledPaper>
+    </StyledContainer>
   );
 };
 

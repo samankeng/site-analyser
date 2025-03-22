@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
@@ -290,7 +290,7 @@ const Security = () => {
           Security Settings
         </Typography>
         <Button
-          variant="contained"
+          variant="filled"
           color="primary"
           startIcon={<SaveIcon />}
           onClick={handleSaveSettings}
@@ -301,7 +301,7 @@ const Security = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, mb: 3, height: '100%' }}>
+          <Paper elevation={2} sx={{ p: 3, mb: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <SecurityIcon color="primary" sx={{ mr: 1 }} />
               <Typography variant="h5" component="h2">
@@ -372,7 +372,7 @@ const Security = () => {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, mb: 3, height: '100%' }}>
+          <Paper elevation={2} sx={{ p: 3, mb: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <VpnKeyIcon color="primary" sx={{ mr: 1 }} />
               <Typography variant="h5" component="h2">
@@ -399,7 +399,7 @@ const Security = () => {
                   Disable Two-Factor Authentication
                 </Button>
               ) : (
-                <Button variant="contained" color="primary" onClick={handleEnableTwoFactor}>
+                <Button variant="filled" color="primary" onClick={handleEnableTwoFactor}>
                   Enable Two-Factor Authentication
                 </Button>
               )}
@@ -423,7 +423,7 @@ const Security = () => {
         </Grid>
 
         <Grid item xs={12}>
-          <Paper sx={{ p: 3, mb: 3 }}>
+          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <PhonelinkLockIcon color="primary" sx={{ mr: 1 }} />
               <Typography variant="h5" component="h2">
@@ -462,7 +462,7 @@ const Security = () => {
                   sx={{ mr: 2, flexGrow: 1 }}
                 />
                 <Button
-                  variant="contained"
+                  variant="filled"
                   startIcon={<AddIcon />}
                   onClick={handleGenerateApiKey}
                   disabled={!settings.apiAccessEnabled}
@@ -531,7 +531,7 @@ const Security = () => {
                   sx={{ mr: 2, flexGrow: 1 }}
                 />
                 <Button
-                  variant="contained"
+                  variant="filled"
                   startIcon={<AddIcon />}
                   onClick={handleAddIpAddress}
                   disabled={!settings.apiAccessEnabled}
@@ -572,6 +572,7 @@ const Security = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
             {/* This would be replaced with an actual QR code image in production */}
             <Card
+              elevation={2}
               sx={{
                 width: 200,
                 height: 200,
@@ -606,7 +607,7 @@ const Security = () => {
           <Button onClick={() => setTwoFactorSetupOpen(false)}>Cancel</Button>
           <Button
             onClick={handleVerifyTwoFactor}
-            variant="contained"
+            variant="filled"
             disabled={twoFactorCode.length !== 6}
           >
             Verify and Enable
@@ -672,7 +673,7 @@ const Security = () => {
               setNewApiKey('');
               setShowApiKey(false);
             }}
-            variant="contained"
+            variant="filled"
             startIcon={<CheckIcon />}
           >
             I've Saved My Key
@@ -686,12 +687,12 @@ const Security = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
   );
-}; // <-- Component function ends here
+};
 
 export default Security;

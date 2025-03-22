@@ -1,64 +1,77 @@
 import React from 'react';
-import { Typography, Breadcrumbs, Box, Paper, Button, Divider } from '@mui/material';
+import { Typography, Breadcrumbs, Box, Paper, Button, Divider, styled } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { makeStyles } from '@mui/styles';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import HomeIcon from '@mui/icons-material/Home';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginBottom: theme.spacing(3),
+// Styled components using emotion instead of makeStyles
+const Root = styled('div')(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius,
+}));
+
+const TitleContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  [theme.breakpoints.down('xs')]: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
-  paper: {
-    padding: theme.spacing(3),
-    borderRadius: theme.shape.borderRadius,
+}));
+
+const Title = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  fontWeight: 600,
+}));
+
+const Subtitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginBottom: theme.spacing(2),
+}));
+
+const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const IconWrapper = styled('span')(({ theme }) => ({
+  marginRight: theme.spacing(0.5),
+  fontSize: 20,
+  verticalAlign: 'text-bottom',
+}));
+
+const BreadcrumbLink = styled(RouterLink)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: theme.palette.text.secondary,
+  textDecoration: 'none',
+  '&:hover': {
+    textDecoration: 'underline',
   },
-  titleContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    [theme.breakpoints.down('xs')]: {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
+}));
+
+const BreadcrumbTypography = styled(Typography)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: theme.palette.text.primary,
+}));
+
+const Actions = styled('div')(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1),
+  [theme.breakpoints.down('xs')]: {
+    marginTop: theme.spacing(2),
+    width: '100%',
+    justifyContent: 'flex-end',
   },
-  title: {
-    marginBottom: theme.spacing(1),
-    fontWeight: 600,
-  },
-  subtitle: {
-    color: theme.palette.text.secondary,
-    marginBottom: theme.spacing(2),
-  },
-  breadcrumbs: {
-    marginBottom: theme.spacing(1),
-  },
-  icon: {
-    marginRight: theme.spacing(0.5),
-    fontSize: 20,
-    verticalAlign: 'text-bottom',
-  },
-  breadcrumbLink: {
-    display: 'flex',
-    alignItems: 'center',
-    color: theme.palette.text.secondary,
-    textDecoration: 'none',
-    '&:hover': {
-      textDecoration: 'underline',
-    },
-  },
-  actions: {
-    display: 'flex',
-    gap: theme.spacing(1),
-    [theme.breakpoints.down('xs')]: {
-      marginTop: theme.spacing(2),
-      width: '100%',
-      justifyContent: 'flex-end',
-    },
-  },
-  divider: {
-    margin: theme.spacing(2, 0),
-  },
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(2, 0),
 }));
 
 /**
@@ -79,55 +92,37 @@ const PageHeader = ({
   divider = false,
   paper = true,
 }) => {
-  const classes = useStyles();
-
   const renderBreadcrumbs = () => {
     if (breadcrumbs.length === 0) {
       return null;
     }
 
     return (
-      <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
-        aria-label="breadcrumb"
-        className={classes.breadcrumbs}
-      >
-        <RouterLink to="/" className={classes.breadcrumbLink}>
-          <HomeIcon className={classes.icon} />
+      <StyledBreadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
+        <BreadcrumbLink to="/">
+          <HomeIcon sx={{ mr: 0.5, fontSize: 20 }} />
           Home
-        </RouterLink>
+        </BreadcrumbLink>
         {breadcrumbs.map((breadcrumb, index) => {
           const isLast = index === breadcrumbs.length - 1;
-          
+
           if (isLast || !breadcrumb.link) {
             return (
-              <Typography
-                key={index}
-                color="textPrimary"
-                className={classes.breadcrumbLink}
-              >
-                {breadcrumb.icon && (
-                  <span className={classes.icon}>{breadcrumb.icon}</span>
-                )}
+              <BreadcrumbTypography key={index}>
+                {breadcrumb.icon && <IconWrapper>{breadcrumb.icon}</IconWrapper>}
                 {breadcrumb.label}
-              </Typography>
+              </BreadcrumbTypography>
             );
           }
-          
+
           return (
-            <RouterLink
-              key={index}
-              to={breadcrumb.link}
-              className={classes.breadcrumbLink}
-            >
-              {breadcrumb.icon && (
-                <span className={classes.icon}>{breadcrumb.icon}</span>
-              )}
+            <BreadcrumbLink key={index} to={breadcrumb.link}>
+              {breadcrumb.icon && <IconWrapper>{breadcrumb.icon}</IconWrapper>}
               {breadcrumb.label}
-            </RouterLink>
+            </BreadcrumbLink>
           );
         })}
-      </Breadcrumbs>
+      </StyledBreadcrumbs>
     );
   };
 
@@ -137,7 +132,7 @@ const PageHeader = ({
     }
 
     return (
-      <div className={classes.actions}>
+      <Actions>
         {actions.map((action, index) => (
           <Button
             key={index}
@@ -150,32 +145,26 @@ const PageHeader = ({
             {action.label}
           </Button>
         ))}
-      </div>
+      </Actions>
     );
   };
 
   const content = (
-    <div className={classes.root}>
+    <Root>
       {renderBreadcrumbs()}
-      <div className={classes.titleContainer}>
+      <TitleContainer>
         <div>
-          <Typography variant="h4" className={classes.title}>
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="subtitle1" className={classes.subtitle}>
-              {subtitle}
-            </Typography>
-          )}
+          <Title variant="h4">{title}</Title>
+          {subtitle && <Subtitle variant="subtitle1">{subtitle}</Subtitle>}
         </div>
         {renderActions()}
-      </div>
-      {divider && <Divider className={classes.divider} />}
-    </div>
+      </TitleContainer>
+      {divider && <StyledDivider />}
+    </Root>
   );
 
   if (paper) {
-    return <Paper className={classes.paper}>{content}</Paper>;
+    return <StyledPaper>{content}</StyledPaper>;
   }
 
   return content;

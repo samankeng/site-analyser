@@ -13,9 +13,9 @@ import {
   CardContent,
   Grid,
   Button,
-  CircularProgress
-} from '@material-ui/core';
-import { makeStyles } from '@mui/styles';
+  CircularProgress,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
@@ -24,54 +24,63 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  section: {
-    marginBottom: theme.spacing(3),
-  },
-  sectionTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: theme.spacing(2),
-  },
-  sectionIcon: {
-    marginRight: theme.spacing(1),
-    color: theme.palette.primary.main,
-  },
-  riskAssessment: {
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(3),
-    backgroundColor: theme.palette.background.default,
-    borderLeft: `4px solid ${theme.palette.warning.main}`,
-  },
-  priorityChip: {
-    marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  critical: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-  },
-  high: {
-    backgroundColor: theme.palette.error.light,
-    color: theme.palette.error.contrastText,
-  },
-  medium: {
-    backgroundColor: theme.palette.warning.main,
-    color: theme.palette.warning.contrastText,
-  },
-  low: {
-    backgroundColor: theme.palette.info.main,
-    color: theme.palette.info.contrastText,
-  },
-  recommendationCard: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  priorityBadge: {
+// Using styled API instead of makeStyles
+const Root = styled('div')({
+  width: '100%',
+});
+
+const Section = styled('div')(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const SectionTitle = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
+}));
+
+const SectionIcon = styled('span')(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  color: theme.palette.primary.main,
+}));
+
+const RiskAssessment = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+  backgroundColor: theme.palette.background.default,
+  borderLeft: `4px solid ${theme.palette.warning.main}`,
+}));
+
+const PriorityChip = styled(Chip)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+const RecommendationCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const PriorityBadge = styled('div')(({ theme, priority }) => {
+  let backgroundColor;
+  let color;
+
+  switch (priority) {
+    case 1:
+      backgroundColor = theme.palette.error.main;
+      color = theme.palette.error.contrastText;
+      break;
+    case 2:
+      backgroundColor = theme.palette.warning.main;
+      color = theme.palette.warning.contrastText;
+      break;
+    default:
+      backgroundColor = theme.palette.info.main;
+      color = theme.palette.info.contrastText;
+  }
+
+  return {
     position: 'absolute',
     top: theme.spacing(1),
     right: theme.spacing(1),
@@ -79,201 +88,206 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     fontSize: '0.75rem',
     fontWeight: 'bold',
-  },
-  priority1: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-  },
-  priority2: {
-    backgroundColor: theme.palette.warning.main,
-    color: theme.palette.warning.contrastText,
-  },
-  priority3: {
-    backgroundColor: theme.palette.info.main,
-    color: theme.palette.info.contrastText,
-  },
-  cardContent: {
-    position: 'relative',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(4),
-  },
-  noDataContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(4),
-    textAlign: 'center',
-  },
-  generateButton: {
-    marginTop: theme.spacing(2),
-  },
-  bulb: {
-    fontSize: 48,
-    marginBottom: theme.spacing(2),
-    color: theme.palette.grey[400],
-  },
-  disclaimer: {
-    marginTop: theme.spacing(3),
-    padding: theme.spacing(2),
-    backgroundColor: theme.palette.background.default,
-    borderRadius: 4,
-  },
+    backgroundColor,
+    color,
+  };
+});
+
+const CardContentStyled = styled(CardContent)(({ theme }) => ({
+  position: 'relative',
 }));
+
+const LoadingContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(4),
+}));
+
+const NoDataContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(4),
+  textAlign: 'center',
+}));
+
+const GenerateButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+}));
+
+const Bulb = styled(LightbulbOutlinedIcon)(({ theme }) => ({
+  fontSize: 48,
+  marginBottom: theme.spacing(2),
+  color: theme.palette.grey[400],
+}));
+
+const Disclaimer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(3),
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.background.default,
+  borderRadius: 4,
+}));
+
+// Helper function to get chip styling based on priority
+const getChipSx = (index, theme) => {
+  if (index === 0) {
+    return {
+      backgroundColor: theme.palette.error.main,
+      color: theme.palette.error.contrastText,
+    };
+  } else if (index === 1) {
+    return {
+      backgroundColor: theme.palette.error.light,
+      color: theme.palette.error.contrastText,
+    };
+  } else {
+    return {
+      backgroundColor: theme.palette.warning.main,
+      color: theme.palette.warning.contrastText,
+    };
+  }
+};
 
 /**
  * AI-generated recommendations component for security reports
- * 
+ *
  * @param {Object} props - Component props
  * @param {Object} props.analysis - AI analysis data from the API
  * @param {boolean} props.loading - Loading state
  * @param {Function} props.onGenerateAnalysis - Function to call when generate button is clicked
  */
-const AiRecommendations = ({ 
-  analysis, 
-  loading = false, 
-  onGenerateAnalysis
-}) => {
-  const classes = useStyles();
-  
+const AiRecommendations = ({ analysis, loading = false, onGenerateAnalysis }) => {
   // If loading, show loading state
   if (loading) {
     return (
-      <div className={classes.loadingContainer}>
+      <LoadingContainer>
         <CircularProgress size={40} thickness={4} />
-        <Typography variant="body1" style={{ marginTop: 16 }}>
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
           Generating AI-enhanced security analysis...
         </Typography>
-      </div>
+      </LoadingContainer>
     );
   }
 
   // If no analysis data, show empty state with generate button
-  if (!analysis || (
-    !analysis.recommendations?.length && 
-    !analysis.riskAssessment && 
-    !analysis.prioritizedActions?.length)
+  if (
+    !analysis ||
+    (!analysis.recommendations?.length &&
+      !analysis.riskAssessment &&
+      !analysis.prioritizedActions?.length)
   ) {
     return (
-      <div className={classes.noDataContainer}>
-        <LightbulbOutlinedIcon className={classes.bulb} />
-        <Typography variant="h6">
-          AI-enhanced analysis not available
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
+      <NoDataContainer>
+        <Bulb />
+        <Typography variant="h6">AI-enhanced analysis not available</Typography>
+        <Typography variant="body2" color="text.secondary">
           Generate an AI-powered analysis to get personalized recommendations and insights.
         </Typography>
         {onGenerateAnalysis && (
-          <Button
+          <GenerateButton
             variant="contained"
             color="primary"
-            className={classes.generateButton}
             onClick={onGenerateAnalysis}
             startIcon={<AutorenewIcon />}
           >
             Generate Analysis
-          </Button>
+          </GenerateButton>
         )}
-      </div>
+      </NoDataContainer>
     );
   }
-  
+
   // Default values if analysis is incomplete
   const recommendations = analysis.recommendations || [];
-  const riskAssessment = analysis.riskAssessment || analysis.risk_assessment || "No risk assessment available.";
+  const riskAssessment =
+    analysis.riskAssessment || analysis.risk_assessment || 'No risk assessment available.';
   const prioritizedActions = analysis.prioritizedActions || analysis.prioritized_actions || [];
-  
+
   return (
-    <div className={classes.root}>
+    <Root>
       {/* Risk Assessment */}
-      <div className={classes.section}>
-        <div className={classes.sectionTitle}>
-          <AssessmentIcon className={classes.sectionIcon} />
+      <Section>
+        <SectionTitle>
+          <SectionIcon>
+            <AssessmentIcon />
+          </SectionIcon>
           <Typography variant="h6">Risk Assessment</Typography>
-        </div>
-        <Paper className={classes.riskAssessment} elevation={0}>
+        </SectionTitle>
+        <RiskAssessment elevation={0}>
           <Typography variant="body1">{riskAssessment}</Typography>
-        </Paper>
-      </div>
-      
+        </RiskAssessment>
+      </Section>
+
       {/* Priority Actions */}
       {prioritizedActions.length > 0 && (
-        <div className={classes.section}>
-          <div className={classes.sectionTitle}>
-            <PriorityHighIcon className={classes.sectionIcon} />
+        <Section>
+          <SectionTitle>
+            <SectionIcon>
+              <PriorityHighIcon />
+            </SectionIcon>
             <Typography variant="h6">Prioritized Actions</Typography>
-          </div>
+          </SectionTitle>
           <List>
             {prioritizedActions.map((action, index) => (
               <ListItem key={index} alignItems="flex-start">
                 <ListItemIcon>
-                  <Chip 
-                    label={`P${index + 1}`} 
-                    className={`${classes.priorityChip} ${
-                      index === 0 ? classes.critical : 
-                      index === 1 ? classes.high : 
-                      classes.medium
-                    }`} 
+                  <PriorityChip
+                    label={`P${index + 1}`}
                     size="small"
+                    sx={theme => getChipSx(index, theme)}
                   />
                 </ListItemIcon>
                 <ListItemText primary={action} />
               </ListItem>
             ))}
           </List>
-        </div>
+        </Section>
       )}
-      
-      <Divider style={{ margin: '16px 0' }} />
-      
+
+      <Divider sx={{ margin: '16px 0' }} />
+
       {/* Security Recommendations */}
       {recommendations.length > 0 && (
-        <div className={classes.section}>
-          <div className={classes.sectionTitle}>
-            <BugReportIcon className={classes.sectionIcon} />
+        <Section>
+          <SectionTitle>
+            <SectionIcon>
+              <BugReportIcon />
+            </SectionIcon>
             <Typography variant="h6">AI-Generated Security Recommendations</Typography>
-          </div>
-          
+          </SectionTitle>
+
           <Grid container spacing={3}>
             {recommendations.map((recommendation, index) => (
               <Grid item xs={12} md={4} key={index}>
-                <Card className={classes.recommendationCard}>
-                  <CardContent className={classes.cardContent}>
-                    <div className={`${classes.priorityBadge} ${
-                      index === 0 ? classes.priority1 : 
-                      index === 1 ? classes.priority2 : 
-                      classes.priority3
-                    }`}>
-                      Priority {index + 1}
-                    </div>
+                <RecommendationCard>
+                  <CardContentStyled>
+                    <PriorityBadge priority={index + 1}>Priority {index + 1}</PriorityBadge>
                     <Typography variant="h6" gutterBottom>
                       {recommendation.split('.')[0]}.
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="body2" color="text.secondary">
                       {recommendation.split('.').slice(1).join('.').trim()}
                     </Typography>
-                  </CardContent>
-                </Card>
+                  </CardContentStyled>
+                </RecommendationCard>
               </Grid>
             ))}
           </Grid>
-        </div>
+        </Section>
       )}
-      
+
       {/* Disclaimer */}
-      <Box className={classes.disclaimer}>
-        <Typography variant="caption" color="textSecondary">
-          <strong>Note:</strong> These recommendations are generated by AI based on the scan results. 
-          While they provide valuable guidance, we recommend consulting with a security professional 
-          for comprehensive security implementation.
+      <Disclaimer>
+        <Typography variant="caption" color="text.secondary">
+          <strong>Note:</strong> These recommendations are generated by AI based on the scan
+          results. While they provide valuable guidance, we recommend consulting with a security
+          professional for comprehensive security implementation.
         </Typography>
-      </Box>
-    </div>
+      </Disclaimer>
+    </Root>
   );
 };
 

@@ -18,142 +18,226 @@ import {
 } from './types';
 import { setAlert } from './alertActions';
 import api from '../../services/api';
+import { createAsyncThunk, createAction } from '@reduxjs/toolkit';
+import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 
-// Initiate a new security scan
-export const initiateScan = (scanData) => async (dispatch) => {
-  try {
-    dispatch({ type: SCAN_REQUEST });
+/**
+ * Initiate a new security scan (React 19 & MUI v6 compatible)
+ */
+export const initiateScan = createAsyncThunk(
+  'scans/initiate',
+  async (scanData, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch({ type: SCAN_REQUEST });
 
-    const res = await api.post('/scans', scanData);
+      const res = await api.post('/scans', scanData);
+      const scanResult = res.data.data;
 
-    dispatch({
-      type: SCAN_SUCCESS,
-      payload: res.data.data
-    });
+      dispatch({
+        type: SCAN_SUCCESS,
+        payload: scanResult,
+      });
 
-    dispatch(setAlert('Scan initiated successfully', 'success'));
+      dispatch(setAlert('Scan initiated successfully', 'success'));
 
-    return res.data.data;
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || 'Failed to initiate scan';
-    
-    dispatch({
-      type: SCAN_ERROR,
-      payload: errorMessage
-    });
+      return scanResult;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to initiate scan';
 
-    dispatch(setAlert(errorMessage, 'error'));
-    return null;
+      dispatch({
+        type: SCAN_ERROR,
+        payload: errorMessage,
+      });
+
+      dispatch(setAlert(errorMessage, 'error'));
+      return rejectWithValue(errorMessage);
+    }
   }
-};
+);
 
-// Get scan status
-export const getScanStatus = (scanId) => async (dispatch) => {
-  try {
-    dispatch({ type: SCAN_STATUS_REQUEST });
+/**
+ * Get scan status (React 19 & MUI v6 compatible)
+ */
+export const getScanStatus = createAsyncThunk(
+  'scans/getStatus',
+  async (scanId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch({ type: SCAN_STATUS_REQUEST });
 
-    const res = await api.get(`/scans/${scanId}`);
+      const res = await api.get(`/scans/${scanId}`);
+      const statusData = res.data.data;
 
-    dispatch({
-      type: SCAN_STATUS_SUCCESS,
-      payload: res.data.data
-    });
+      dispatch({
+        type: SCAN_STATUS_SUCCESS,
+        payload: statusData,
+      });
 
-    return res.data.data;
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || 'Failed to get scan status';
-    
-    dispatch({
-      type: SCAN_STATUS_ERROR,
-      payload: errorMessage
-    });
+      return statusData;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to get scan status';
 
-    dispatch(setAlert(errorMessage, 'error'));
-    return null;
+      dispatch({
+        type: SCAN_STATUS_ERROR,
+        payload: errorMessage,
+      });
+
+      dispatch(setAlert(errorMessage, 'error'));
+      return rejectWithValue(errorMessage);
+    }
   }
-};
+);
 
-// Get scan results
-export const getScanResults = (scanId) => async (dispatch) => {
-  try {
-    dispatch({ type: SCAN_RESULTS_REQUEST });
+/**
+ * Get scan results (React 19 & MUI v6 compatible)
+ */
+export const getScanResults = createAsyncThunk(
+  'scans/getResults',
+  async (scanId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch({ type: SCAN_RESULTS_REQUEST });
 
-    const res = await api.get(`/scans/${scanId}/results`);
+      const res = await api.get(`/scans/${scanId}/results`);
+      const resultsData = res.data.data;
 
-    dispatch({
-      type: SCAN_RESULTS_SUCCESS,
-      payload: res.data.data
-    });
+      dispatch({
+        type: SCAN_RESULTS_SUCCESS,
+        payload: resultsData,
+      });
 
-    return res.data.data;
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || 'Failed to get scan results';
-    
-    dispatch({
-      type: SCAN_RESULTS_ERROR,
-      payload: errorMessage
-    });
+      return resultsData;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to get scan results';
 
-    dispatch(setAlert(errorMessage, 'error'));
-    return null;
+      dispatch({
+        type: SCAN_RESULTS_ERROR,
+        payload: errorMessage,
+      });
+
+      dispatch(setAlert(errorMessage, 'error'));
+      return rejectWithValue(errorMessage);
+    }
   }
-};
+);
 
-// Cancel a scan
-export const cancelScan = (scanId) => async (dispatch) => {
-  try {
-    dispatch({ type: SCAN_CANCEL_REQUEST });
+/**
+ * Cancel a scan (React 19 & MUI v6 compatible)
+ */
+export const cancelScan = createAsyncThunk(
+  'scans/cancel',
+  async (scanId, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch({ type: SCAN_CANCEL_REQUEST });
 
-    const res = await api.delete(`/scans/${scanId}`);
+      const res = await api.delete(`/scans/${scanId}`);
 
-    dispatch({
-      type: SCAN_CANCEL_SUCCESS,
-      payload: res.data
-    });
+      dispatch({
+        type: SCAN_CANCEL_SUCCESS,
+        payload: res.data,
+      });
 
-    dispatch(setAlert('Scan cancelled successfully', 'success'));
+      dispatch(setAlert('Scan cancelled successfully', 'success'));
 
-    return true;
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || 'Failed to cancel scan';
-    
-    dispatch({
-      type: SCAN_CANCEL_ERROR,
-      payload: errorMessage
-    });
+      return scanId;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to cancel scan';
 
-    dispatch(setAlert(errorMessage, 'error'));
-    return false;
+      dispatch({
+        type: SCAN_CANCEL_ERROR,
+        payload: errorMessage,
+      });
+
+      dispatch(setAlert(errorMessage, 'error'));
+      return rejectWithValue(errorMessage);
+    }
   }
-};
+);
 
-// Get recent scans
-export const getRecentScans = () => async (dispatch) => {
-  try {
-    dispatch({ type: RECENT_SCANS_REQUEST });
+/**
+ * Get recent scans (React 19 & MUI v6 compatible)
+ */
+export const getRecentScans = createAsyncThunk(
+  'scans/getRecent',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch({ type: RECENT_SCANS_REQUEST });
 
-    const res = await api.get('/scans/recent');
+      const res = await api.get('/scans/recent');
+      const scansData = res.data.data;
 
-    dispatch({
-      type: RECENT_SCANS_SUCCESS,
-      payload: res.data.data
-    });
+      dispatch({
+        type: RECENT_SCANS_SUCCESS,
+        payload: scansData,
+      });
 
-    return res.data.data;
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || 'Failed to get recent scans';
-    
-    dispatch({
-      type: RECENT_SCANS_ERROR,
-      payload: errorMessage
-    });
+      return scansData;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to get recent scans';
 
-    dispatch(setAlert(errorMessage, 'error'));
-    return [];
+      dispatch({
+        type: RECENT_SCANS_ERROR,
+        payload: errorMessage,
+      });
+
+      dispatch(setAlert(errorMessage, 'error'));
+      return rejectWithValue(errorMessage) || [];
+    }
   }
-};
+);
 
-// Clear scan state
-export const clearScanState = () => ({
-  type: CLEAR_SCAN_STATE
-});
+/**
+ * Clear scan state (React 19 & MUI v6 compatible)
+ */
+export const clearScanState = createAction(CLEAR_SCAN_STATE);
+
+/**
+ * Custom hook for scan actions
+ */
+export const useScanActions = () => {
+  const dispatch = useDispatch();
+
+  const startScan = useCallback(
+    scanData => {
+      return dispatch(initiateScan(scanData));
+    },
+    [dispatch]
+  );
+
+  const checkScanStatus = useCallback(
+    scanId => {
+      return dispatch(getScanStatus(scanId));
+    },
+    [dispatch]
+  );
+
+  const fetchScanResults = useCallback(
+    scanId => {
+      return dispatch(getScanResults(scanId));
+    },
+    [dispatch]
+  );
+
+  const stopScan = useCallback(
+    scanId => {
+      return dispatch(cancelScan(scanId));
+    },
+    [dispatch]
+  );
+
+  const fetchRecentScans = useCallback(() => {
+    return dispatch(getRecentScans());
+  }, [dispatch]);
+
+  const resetScanState = useCallback(() => {
+    return dispatch(clearScanState());
+  }, [dispatch]);
+
+  return {
+    startScan,
+    checkScanStatus,
+    fetchScanResults,
+    stopScan,
+    fetchRecentScans,
+    resetScanState,
+  };
+};

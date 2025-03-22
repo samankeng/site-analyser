@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Typography, Grid, Paper, Button, Tabs, Tab, Box } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import ScanProgress from '../../components/security/ScanProgress';
@@ -13,49 +13,50 @@ import AiRecommendations from '../../components/reports/AiRecommendations';
 import useScan from '../../hooks/useScan';
 import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(4),
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing(3),
-  },
-  tabPanel: {
-    marginTop: theme.spacing(2),
-  },
-  actionButtons: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(3),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  padding: theme.spacing(4),
 }));
 
-function TabPanel(props) {
+const Header = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: theme.spacing(3),
+}));
+
+const TabPanel = styled('div')(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  width: '100%',
+}));
+
+const ActionButtons = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  marginTop: theme.spacing(3),
+}));
+
+function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
+    <TabPanel
       role="tabpanel"
       hidden={value !== index}
       id={`scan-tabpanel-${index}`}
       aria-labelledby={`scan-tab-${index}`}
       {...other}
-      style={{ width: '100%' }}
     >
-      {value === index && <Box p={3}>{children}</Box>}
-    </div>
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </TabPanel>
   );
 }
 
 const ScanStatus = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const { scanId } = useParams();
   const { fetchScanResults, currentScan, cancelScan } = useScan();
-  const { showAlert } = useAlert();
+  const { addAlert } = useAlert(); // Changed from showAlert to addAlert
 
   const [tabValue, setTabValue] = useState(0);
   const [scanResults, setScanResults] = useState(null);
@@ -67,17 +68,17 @@ const ScanStatus = () => {
         if (results) {
           setScanResults(results);
         } else {
-          showAlert('Failed to load scan results', 'error');
+          addAlert('Failed to load scan results', 'error');
         }
       } catch (error) {
-        showAlert('Error retrieving scan details', 'error');
+        addAlert('Error retrieving scan details', 'error');
       }
     };
 
     if (currentScan?.status === 'completed') {
       loadScanResults();
     }
-  }, [scanId, currentScan, fetchScanResults, showAlert]);
+  }, [scanId, currentScan, fetchScanResults, addAlert]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -87,21 +88,21 @@ const ScanStatus = () => {
     try {
       const success = await cancelScan(scanId);
       if (success) {
-        showAlert('Scan cancelled successfully', 'info');
+        addAlert('Scan cancelled successfully', 'info');
         navigate('/dashboard');
       }
     } catch (error) {
-      showAlert('Failed to cancel scan', 'error');
+      addAlert('Failed to cancel scan', 'error');
     }
   };
 
   return (
-    <Container maxWidth="lg" className={classes.root}>
-      <div className={classes.header}>
+    <StyledContainer maxWidth="lg">
+      <Header>
         <Typography variant="h4">
           Scan Results
           {currentScan?.targetUrl && (
-            <Typography variant="subtitle1" color="textSecondary">
+            <Typography variant="subtitle1" color="text.secondary">
               {currentScan.targetUrl}
             </Typography>
           )}
@@ -109,7 +110,7 @@ const ScanStatus = () => {
         <Button variant="outlined" color="primary" onClick={() => navigate('/scans/new')}>
           New Scan
         </Button>
-      </div>
+      </Header>
 
       {/* Scan Progress Indicator */}
       <ScanProgress
@@ -122,7 +123,7 @@ const ScanStatus = () => {
       {/* Detailed Results */}
       {currentScan?.status === 'completed' && (
         <>
-          <Grid container spacing={3} style={{ marginTop: 16 }}>
+          <Grid container spacing={3} sx={{ mt: 2 }}>
             <Grid item xs={12} md={4}>
               <SecurityScoreCard
                 score={scanResults?.securityScore}
@@ -143,24 +144,24 @@ const ScanStatus = () => {
                   <Tab label="AI Recommendations" />
                 </Tabs>
 
-                <TabPanel value={tabValue} index={0}>
+                <CustomTabPanel value={tabValue} index={0}>
                   <VulnerabilityList vulnerabilities={scanResults?.vulnerabilities} />
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
+                </CustomTabPanel>
+                <CustomTabPanel value={tabValue} index={1}>
                   <HeaderAnalysis headers={scanResults?.headers} />
-                </TabPanel>
-                <TabPanel value={tabValue} index={2}>
+                </CustomTabPanel>
+                <CustomTabPanel value={tabValue} index={2}>
                   <SslAnalysis sslDetails={scanResults?.sslAnalysis} />
-                </TabPanel>
-                <TabPanel value={tabValue} index={3}>
+                </CustomTabPanel>
+                <CustomTabPanel value={tabValue} index={3}>
                   <AiRecommendations recommendations={scanResults?.aiRecommendations} />
-                </TabPanel>
+                </CustomTabPanel>
               </Paper>
             </Grid>
           </Grid>
 
-          <div className={classes.actionButtons}>
-            <Button variant="outlined" color="default" onClick={() => navigate('/dashboard')}>
+          <ActionButtons>
+            <Button variant="outlined" color="inherit" onClick={() => navigate('/dashboard')}>
               Back to Dashboard
             </Button>
             <Button
@@ -172,10 +173,10 @@ const ScanStatus = () => {
             >
               Export Full Report
             </Button>
-          </div>
+          </ActionButtons>
         </>
       )}
-    </Container>
+    </StyledContainer>
   );
 };
 

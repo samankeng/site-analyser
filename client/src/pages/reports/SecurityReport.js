@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -7,7 +7,6 @@ import {
   Paper,
   Tabs,
   Tab,
-  Button,
   Grid,
   CircularProgress,
   Chip,
@@ -94,7 +93,7 @@ const SecurityReport = () => {
             <Typography variant="h5" gutterBottom>
               {currentReport.domain}
             </Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant="body2" color="text.secondary">
               Scan completed on {formatDate(currentReport.createdAt)}
             </Typography>
             <Box sx={{ mt: 2 }}>
@@ -129,9 +128,6 @@ const SecurityReport = () => {
                 thickness={5}
                 sx={{
                   color: theme => theme.palette[riskLevel.color].main,
-                  circle: {
-                    strokeLinecap: 'round',
-                  },
                 }}
               />
               <Box
@@ -208,7 +204,7 @@ const SecurityReport = () => {
                       Risk Score Breakdown
                     </Typography>
                     {/* Risk score visualization would go here */}
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="body2" color="text.secondary">
                       The overall risk score is calculated based on the severity and number of
                       detected vulnerabilities.
                     </Typography>

@@ -10,7 +10,7 @@ import {
   AUTH_ERROR,
   UPDATE_PROFILE_REQUEST,
   UPDATE_PROFILE_SUCCESS,
-  UPDATE_PROFILE_ERROR
+  UPDATE_PROFILE_ERROR,
 } from '../actions/types';
 
 const initialState = {
@@ -18,9 +18,10 @@ const initialState = {
   isAuthenticated: null,
   loading: false,
   user: null,
-  error: null
+  error: null,
 };
 
+// Updated to be more compatible with React 19's immutability expectations
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
     case USER_LOADED:
@@ -28,7 +29,7 @@ const authReducer = (state = initialState, action) => {
         ...state,
         isAuthenticated: true,
         loading: false,
-        user: action.payload
+        user: action.payload,
       };
 
     case REGISTER_REQUEST:
@@ -37,17 +38,22 @@ const authReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
       };
 
     case REGISTER_SUCCESS:
     case LOGIN_SUCCESS:
+      // Store token in localStorage
+      if (action.payload.token) {
+        localStorage.setItem('token', action.payload.token);
+      }
+
       return {
         ...state,
         token: action.payload.token,
         isAuthenticated: true,
         loading: false,
-        user: action.payload
+        user: action.payload,
       };
 
     case UPDATE_PROFILE_SUCCESS:
@@ -55,30 +61,42 @@ const authReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         user: action.payload,
-        error: null
+        error: null,
       };
 
     case REGISTER_ERROR:
     case LOGIN_ERROR:
     case AUTH_ERROR:
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+
+      return {
+        ...state,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        user: null,
+        error: action.payload,
+      };
+
     case UPDATE_PROFILE_ERROR:
       return {
         ...state,
-        token: null,
-        isAuthenticated: false,
         loading: false,
-        user: null,
-        error: action.payload
+        error: action.payload,
       };
 
     case LOGOUT:
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+
       return {
         ...state,
         token: null,
         isAuthenticated: false,
         loading: false,
         user: null,
-        error: null
+        error: null,
       };
 
     default:

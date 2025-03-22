@@ -15,9 +15,9 @@ import {
   IconButton,
   Button,
   Divider,
-  useMediaQuery
-} from '@material-ui/core';
-import { makeStyles, useTheme } from '@mui/styles';
+  useMediaQuery,
+} from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import InfoIcon from '@mui/icons-material/Info';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -29,112 +29,124 @@ import CodeIcon from '@mui/icons-material/Code';
 import SpeedIcon from '@mui/icons-material/Speed';
 import WifiIcon from '@mui/icons-material/Wifi';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  formLabel: {
-    fontWeight: 500,
-    marginBottom: theme.spacing(1),
-    display: 'flex',
-    alignItems: 'center',
-  },
-  optionItem: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing(1),
-  },
-  tooltip: {
-    marginLeft: theme.spacing(1),
-    cursor: 'pointer',
-    fontSize: '1rem',
-    verticalAlign: 'middle',
-  },
-  optionIcon: {
-    marginRight: theme.spacing(1),
-    color: theme.palette.primary.main,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontWeight: 500,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  optionDescription: {
-    color: theme.palette.text.secondary,
-    marginTop: theme.spacing(0.5),
-  },
-  toggleContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: theme.spacing(0.5),
-  },
-  advanced: {
-    marginTop: theme.spacing(2),
-  },
-  advancedToggle: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: theme.spacing(1),
-    cursor: 'pointer',
-    color: theme.palette.primary.main,
-  },
-  advancedIcon: {
-    marginLeft: theme.spacing(0.5),
-    fontSize: '1.2rem',
-  },
-  divider: {
-    margin: theme.spacing(2, 0),
-  },
-  presetButtons: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: theme.spacing(1),
-    marginBottom: theme.spacing(2),
-  },
-  presetButton: {
-    textTransform: 'none',
-  },
+// Using styled API instead of makeStyles
+const Root = styled('div')({
+  width: '100%',
+});
+
+const FormLabelStyled = styled('div')(({ theme }) => ({
+  fontWeight: 500,
+  marginBottom: theme.spacing(1),
+  display: 'flex',
+  alignItems: 'center',
 }));
+
+const OptionItem = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'flex-start',
+  marginBottom: theme.spacing(1),
+}));
+
+const TooltipIcon = styled(InfoIcon)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  cursor: 'pointer',
+  fontSize: '1rem',
+  verticalAlign: 'middle',
+}));
+
+const OptionIcon = styled('span')(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  color: theme.palette.primary.main,
+}));
+
+const OptionContent = styled('div')({
+  flex: 1,
+});
+
+const OptionTitle = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+  display: 'flex',
+  alignItems: 'center',
+}));
+
+const OptionDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  marginTop: theme.spacing(0.5),
+}));
+
+const ToggleContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  marginTop: theme.spacing(0.5),
+}));
+
+const Advanced = styled('div')(({ theme }) => ({
+  marginTop: theme.spacing(2),
+}));
+
+const AdvancedToggle = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: theme.spacing(1),
+  cursor: 'pointer',
+  color: theme.palette.primary.main,
+}));
+
+const AdvancedIcon = styled('span')(({ theme }) => ({
+  marginLeft: theme.spacing(0.5),
+  fontSize: '1.2rem',
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(2, 0),
+}));
+
+const PresetButtons = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(2),
+}));
+
+const PresetButton = styled(Button)({
+  textTransform: 'none',
+});
 
 /**
  * Scan options component for configuring security scan parameters
- * 
+ *
  * @param {Object} props - Component props
  * @param {Object} props.options - Current options values
  * @param {Function} props.onChange - Function called when options change
  * @param {boolean} props.disabled - Whether the controls are disabled
  */
 const ScanOptions = ({ options, onChange, disabled = false }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
+
   // Toggle visibility of advanced options
   const toggleAdvanced = () => {
     setShowAdvanced(!showAdvanced);
   };
-  
+
   // Handle option change
-  const handleOptionChange = (event) => {
+  const handleOptionChange = event => {
     const { name, checked } = event.target;
     const newOptions = {
       ...options,
-      [name]: checked
+      [name]: checked,
     };
     onChange(newOptions);
   };
-  
+
   // Apply preset configurations
-  const applyPreset = (preset) => {
+  const applyPreset = preset => {
     let newOptions = { ...options };
-    
+
     switch (preset) {
       case 'quick':
         newOptions = {
@@ -169,32 +181,32 @@ const ScanOptions = ({ options, onChange, disabled = false }) => {
       default:
         break;
     }
-    
+
     onChange(newOptions);
   };
-  
+
   // Get icon for option
-  const getOptionIcon = (optionName) => {
+  const getOptionIcon = optionName => {
     switch (optionName) {
       case 'sslCheck':
-        return <LockIcon className={classes.optionIcon} />;
+        return <LockIcon sx={{ mr: 1, color: 'primary.main' }} />;
       case 'headerAnalysis':
-        return <LanguageIcon className={classes.optionIcon} />;
+        return <LanguageIcon sx={{ mr: 1, color: 'primary.main' }} />;
       case 'portScan':
-        return <WifiIcon className={classes.optionIcon} />;
+        return <WifiIcon sx={{ mr: 1, color: 'primary.main' }} />;
       case 'vulnDetection':
-        return <BugReportIcon className={classes.optionIcon} />;
+        return <BugReportIcon sx={{ mr: 1, color: 'primary.main' }} />;
       case 'contentAnalysis':
-        return <CodeIcon className={classes.optionIcon} />;
+        return <CodeIcon sx={{ mr: 1, color: 'primary.main' }} />;
       case 'performanceCheck':
-        return <SpeedIcon className={classes.optionIcon} />;
+        return <SpeedIcon sx={{ mr: 1, color: 'primary.main' }} />;
       default:
-        return <InfoIcon className={classes.optionIcon} />;
+        return <InfoIcon sx={{ mr: 1, color: 'primary.main' }} />;
     }
   };
-  
+
   // Get description for option
-  const getOptionDescription = (optionName) => {
+  const getOptionDescription = optionName => {
     switch (optionName) {
       case 'sslCheck':
         return 'Analyze SSL/TLS certificates, protocols, and cipher configurations for security vulnerabilities.';
@@ -212,9 +224,9 @@ const ScanOptions = ({ options, onChange, disabled = false }) => {
         return '';
     }
   };
-  
+
   // Get tooltip for option
-  const getOptionTooltip = (optionName) => {
+  const getOptionTooltip = optionName => {
     switch (optionName) {
       case 'sslCheck':
         return 'Evaluates certificate validity, protocol versions, and cipher strength';
@@ -232,37 +244,27 @@ const ScanOptions = ({ options, onChange, disabled = false }) => {
         return '';
     }
   };
-  
+
   // Basic scanning options
-  const basicOptions = [
-    'sslCheck',
-    'headerAnalysis',
-    'portScan',
-    'vulnDetection'
-  ];
-  
+  const basicOptions = ['sslCheck', 'headerAnalysis', 'portScan', 'vulnDetection'];
+
   // Advanced scanning options
-  const advancedOptions = [
-    'contentAnalysis',
-    'performanceCheck'
-  ];
-  
+  const advancedOptions = ['contentAnalysis', 'performanceCheck'];
+
   // Render option item
   const renderOption = (optionName, label) => (
-    <div className={classes.optionItem} key={optionName}>
-      <div className={classes.optionContent}>
-        <Typography className={classes.optionTitle}>
+    <OptionItem key={optionName}>
+      <OptionContent>
+        <OptionTitle variant="body1">
           {getOptionIcon(optionName)}
           {label}
           <Tooltip title={getOptionTooltip(optionName)}>
-            <InfoIcon className={classes.tooltip} fontSize="small" />
+            <TooltipIcon fontSize="small" />
           </Tooltip>
-        </Typography>
-        <Typography variant="body2" className={classes.optionDescription}>
-          {getOptionDescription(optionName)}
-        </Typography>
-      </div>
-      <div className={classes.toggleContainer}>
+        </OptionTitle>
+        <OptionDescription variant="body2">{getOptionDescription(optionName)}</OptionDescription>
+      </OptionContent>
+      <ToggleContainer>
         <Switch
           checked={options[optionName]}
           onChange={handleOptionChange}
@@ -270,88 +272,95 @@ const ScanOptions = ({ options, onChange, disabled = false }) => {
           color="primary"
           disabled={disabled}
         />
-      </div>
-    </div>
+      </ToggleContainer>
+    </OptionItem>
   );
-  
+
   return (
-    <div className={classes.root}>
-      <Typography variant="subtitle1" className={classes.formLabel}>
-        <SecurityIcon style={{ marginRight: 8 }} />
-        Security Scanning Options
-        <Tooltip title="Configure which security aspects to analyze during the scan">
-          <InfoIcon className={classes.tooltip} fontSize="small" />
-        </Tooltip>
-      </Typography>
-      
-      <div className={classes.presetButtons}>
-        <Button 
-          variant="outlined" 
+    <Root>
+      <FormLabelStyled>
+        <SecurityIcon sx={{ mr: 1 }} />
+        <Typography variant="subtitle1">
+          Security Scanning Options
+          <Tooltip title="Configure which security aspects to analyze during the scan">
+            <InfoIcon
+              sx={{ ml: 1, cursor: 'pointer', fontSize: '1rem', verticalAlign: 'middle' }}
+            />
+          </Tooltip>
+        </Typography>
+      </FormLabelStyled>
+
+      <PresetButtons>
+        <PresetButton
+          variant="outlined"
           size="small"
-          className={classes.presetButton}
           onClick={() => applyPreset('quick')}
           disabled={disabled}
         >
           Quick Scan
-        </Button>
-        <Button 
-          variant="outlined" 
+        </PresetButton>
+        <PresetButton
+          variant="outlined"
           size="small"
           color="primary"
-          className={classes.presetButton}
           onClick={() => applyPreset('standard')}
           disabled={disabled}
         >
           Standard Scan
-        </Button>
-        <Button 
-          variant="outlined" 
+        </PresetButton>
+        <PresetButton
+          variant="outlined"
           size="small"
-          className={classes.presetButton}
           onClick={() => applyPreset('comprehensive')}
           disabled={disabled}
         >
           Comprehensive Scan
-        </Button>
-      </div>
-      
+        </PresetButton>
+      </PresetButtons>
+
       <div>
-        {basicOptions.map(option => 
-          renderOption(option, option === 'sslCheck' ? 'SSL/TLS Analysis' : 
-                              option === 'headerAnalysis' ? 'HTTP Header Analysis' :
-                              option === 'portScan' ? 'Port Scanning' :
-                              option === 'vulnDetection' ? 'Vulnerability Detection' :
-                              option.charAt(0).toUpperCase() + option.slice(1).replace(/([A-Z])/g, ' $1'))
+        {basicOptions.map(option =>
+          renderOption(
+            option,
+            option === 'sslCheck'
+              ? 'SSL/TLS Analysis'
+              : option === 'headerAnalysis'
+              ? 'HTTP Header Analysis'
+              : option === 'portScan'
+              ? 'Port Scanning'
+              : option === 'vulnDetection'
+              ? 'Vulnerability Detection'
+              : option.charAt(0).toUpperCase() + option.slice(1).replace(/([A-Z])/g, ' $1')
+          )
         )}
       </div>
-      
-      <div className={classes.advanced}>
-        <Divider className={classes.divider} />
-        
-        <div 
-          className={classes.advancedToggle}
-          onClick={toggleAdvanced}
-        >
+
+      <Advanced>
+        <StyledDivider />
+
+        <AdvancedToggle onClick={toggleAdvanced}>
           <Typography variant="body2" color="primary">
             {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options'}
           </Typography>
-          {showAdvanced ? 
-            <ExpandLessIcon className={classes.advancedIcon} /> : 
-            <ExpandMoreIcon className={classes.advancedIcon} />
-          }
-        </div>
-        
+          <AdvancedIcon>{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}</AdvancedIcon>
+        </AdvancedToggle>
+
         <Collapse in={showAdvanced}>
-          <Box mt={2}>
-            {advancedOptions.map(option => 
-              renderOption(option, option === 'contentAnalysis' ? 'Content Analysis' :
-                                  option === 'performanceCheck' ? 'Performance Check' :
-                                  option.charAt(0).toUpperCase() + option.slice(1).replace(/([A-Z])/g, ' $1'))
+          <Box sx={{ mt: 2 }}>
+            {advancedOptions.map(option =>
+              renderOption(
+                option,
+                option === 'contentAnalysis'
+                  ? 'Content Analysis'
+                  : option === 'performanceCheck'
+                  ? 'Performance Check'
+                  : option.charAt(0).toUpperCase() + option.slice(1).replace(/([A-Z])/g, ' $1')
+              )
             )}
           </Box>
         </Collapse>
-      </div>
-    </div>
+      </Advanced>
+    </Root>
   );
 };
 

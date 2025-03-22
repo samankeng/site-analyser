@@ -1,54 +1,120 @@
 /**
- * Storage utility functions for handling local storage operations
+ * Enhanced storage utility functions for React 19 and MUI v6
  */
 
-// Token storage key
-const TOKEN_KEY = 'site_analyser_token';
-const USER_KEY = 'site_analyser_user';
-const THEME_KEY = 'site_analyser_theme';
+// Application namespace for storage keys
+const APP_NAMESPACE = 'site_analyser';
+
+// Storage keys with namespace to prevent conflicts
+const TOKEN_KEY = `${APP_NAMESPACE}_token`;
+const USER_KEY = `${APP_NAMESPACE}_user`;
+const THEME_KEY = `${APP_NAMESPACE}_theme`;
+const SETTINGS_KEY = `${APP_NAMESPACE}_settings`;
+const COLOR_MODE_KEY = `${APP_NAMESPACE}_color_mode`; // For MUI v6 color mode
 
 /**
- * Store authentication token in local storage
- * @param {string} token - JWT token
+ * Check if storage is available
+ * @param {string} type - Storage type ('localStorage' or 'sessionStorage')
+ * @returns {boolean} - Whether storage is available
  */
-export const storeToken = (token) => {
+const isStorageAvailable = type => {
+  try {
+    const storage = window[type];
+    const testKey = `${APP_NAMESPACE}_test`;
+    storage.setItem(testKey, 'test');
+    storage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+// Determine available storage methods
+const hasLocalStorage = isStorageAvailable('localStorage');
+const hasSessionStorage = isStorageAvailable('sessionStorage');
+
+/**
+ * Fallback storage for environments without localStorage
+ */
+const memoryStorage = {
+  store: new Map(),
+  getItem(key) {
+    return this.store.get(key) || null;
+  },
+  setItem(key, value) {
+    this.store.set(key, value);
+  },
+  removeItem(key) {
+    this.store.delete(key);
+  },
+  clear() {
+    this.store.clear();
+  },
+};
+
+/**
+ * Get storage instance based on availability
+ * @param {boolean} persistent - Whether to use persistent storage
+ * @returns {Storage} - Storage instance
+ */
+const getStorage = (persistent = true) => {
+  if (persistent && hasLocalStorage) {
+    return window.localStorage;
+  } else if (!persistent && hasSessionStorage) {
+    return window.sessionStorage;
+  }
+
+  console.warn('Using in-memory storage fallback - data will not persist');
+  return memoryStorage;
+};
+
+/**
+ * Store authentication token
+ * @param {string} token - JWT token
+ * @param {boolean} remember - Whether to persist token across sessions
+ */
+export const storeToken = (token, remember = true) => {
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    getStorage(remember).setItem(TOKEN_KEY, token);
   }
 };
 
 /**
- * Retrieve token from local storage
+ * Retrieve token from storage
  * @returns {string|null} - JWT token or null if not found
  */
 export const getStoredToken = () => {
-  return localStorage.getItem(TOKEN_KEY);
+  // Try local storage first, then session storage
+  return getStorage(true).getItem(TOKEN_KEY) || getStorage(false).getItem(TOKEN_KEY);
 };
 
 /**
- * Remove token from local storage
+ * Remove token from all storage locations
  */
 export const removeToken = () => {
-  localStorage.removeItem(TOKEN_KEY);
+  getStorage(true).removeItem(TOKEN_KEY);
+  getStorage(false).removeItem(TOKEN_KEY);
 };
 
 /**
- * Store user data in local storage
+ * Store user data
  * @param {Object} user - User data object
+ * @param {boolean} remember - Whether to persist user data across sessions
  */
-export const storeUser = (user) => {
+export const storeUser = (user, remember = true) => {
   if (user) {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    getStorage(remember).setItem(USER_KEY, JSON.stringify(user));
   }
 };
 
 /**
- * Retrieve user data from local storage
+ * Retrieve user data from storage
  * @returns {Object|null} - User data object or null if not found
  */
 export const getStoredUser = () => {
-  const userData = localStorage.getItem(USER_KEY);
-  
+  // Try local storage first, then session storage
+  const userData = getStorage(true).getItem(USER_KEY) || getStorage(false).getItem(USER_KEY);
+
   if (userData) {
     try {
       return JSON.parse(userData);
@@ -57,42 +123,121 @@ export const getStoredUser = () => {
       return null;
     }
   }
-  
+
   return null;
 };
 
 /**
- * Remove user data from local storage
+ * Remove user data from all storage locations
  */
 export const removeUser = () => {
-  localStorage.removeItem(USER_KEY);
+  getStorage(true).removeItem(USER_KEY);
+  getStorage(false).removeItem(USER_KEY);
 };
 
 /**
- * Store theme preference in local storage
+ * Store theme preference for MUI v6
  * @param {string} theme - Theme preference ('light', 'dark', 'system')
  */
-export const storeTheme = (theme) => {
+export const storeTheme = theme => {
   if (theme) {
-    localStorage.setItem(THEME_KEY, theme);
+    getStorage(true).setItem(THEME_KEY, theme);
   }
 };
 
 /**
- * Retrieve theme preference from local storage
- * @returns {string|null} - Theme preference or null if not found
+ * Retrieve theme preference from storage
+ * @returns {string} - Theme preference
  */
 export const getStoredTheme = () => {
-  return localStorage.getItem(THEME_KEY) || 'system';
+  return getStorage(true).getItem(THEME_KEY) || 'system';
+};
+
+/**
+ * Store MUI v6 color mode
+ * @param {string} mode - Color mode ('light' or 'dark')
+ */
+export const storeColorMode = mode => {
+  if (mode && (mode === 'light' || mode === 'dark')) {
+    getStorage(true).setItem(COLOR_MODE_KEY, mode);
+  }
+};
+
+/**
+ * Retrieve MUI v6 color mode from storage
+ * @returns {string} - Color mode ('light' or 'dark')
+ */
+export const getStoredColorMode = () => {
+  return getStorage(true).getItem(COLOR_MODE_KEY) || 'light';
+};
+
+/**
+ * Store application settings
+ * @param {Object} settings - Settings object
+ */
+export const storeSettings = settings => {
+  if (settings) {
+    getStorage(true).setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+};
+
+/**
+ * Retrieve application settings from storage
+ * @returns {Object} - Settings object or default settings
+ */
+export const getStoredSettings = () => {
+  const settingsData = getStorage(true).getItem(SETTINGS_KEY);
+
+  const defaultSettings = {
+    notifications: true,
+    compactView: false,
+    autoRefresh: false,
+    refreshInterval: 5,
+    defaultView: 'dashboard',
+  };
+
+  if (settingsData) {
+    try {
+      return { ...defaultSettings, ...JSON.parse(settingsData) };
+    } catch (error) {
+      console.error('Error parsing settings from storage', error);
+      return defaultSettings;
+    }
+  }
+
+  return defaultSettings;
+};
+
+/**
+ * Reset settings to defaults
+ */
+export const resetSettings = () => {
+  getStorage(true).removeItem(SETTINGS_KEY);
 };
 
 /**
  * Clear all application storage data
+ * @param {boolean} keepTheme - Whether to keep theme preferences
  */
-export const clearStorage = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  // Keep theme preference
+export const clearStorage = (keepTheme = true) => {
+  const themePreference = keepTheme ? getStoredTheme() : null;
+  const colorMode = keepTheme ? getStoredColorMode() : null;
+
+  // Clear from all storage types
+  [getStorage(true), getStorage(false)].forEach(storage => {
+    const keys = [TOKEN_KEY, USER_KEY, SETTINGS_KEY];
+    if (!keepTheme) {
+      keys.push(THEME_KEY, COLOR_MODE_KEY);
+    }
+
+    keys.forEach(key => storage.removeItem(key));
+  });
+
+  // Restore theme preferences if needed
+  if (keepTheme) {
+    if (themePreference) storeTheme(themePreference);
+    if (colorMode) storeColorMode(colorMode);
+  }
 };
 
 /**
@@ -100,17 +245,18 @@ export const clearStorage = () => {
  * @param {string} key - Storage key
  * @param {any} value - Data to store
  * @param {number} expirationMinutes - Expiration time in minutes
+ * @param {boolean} persistent - Whether to use persistent storage
  */
-export const storeWithExpiration = (key, value, expirationMinutes) => {
+export const storeWithExpiration = (key, value, expirationMinutes, persistent = true) => {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + expirationMinutes * 60 * 1000);
-  
+
   const data = {
     value,
-    expiresAt: expiresAt.toISOString()
+    expiresAt: expiresAt.toISOString(),
   };
-  
-  localStorage.setItem(key, JSON.stringify(data));
+
+  getStorage(persistent).setItem(`${APP_NAMESPACE}_${key}`, JSON.stringify(data));
 };
 
 /**
@@ -118,27 +264,80 @@ export const storeWithExpiration = (key, value, expirationMinutes) => {
  * @param {string} key - Storage key
  * @returns {any|null} - Stored data or null if expired/not found
  */
-export const getWithExpiration = (key) => {
-  const dataString = localStorage.getItem(key);
-  
+export const getWithExpiration = key => {
+  const fullKey = `${APP_NAMESPACE}_${key}`;
+
+  // Try both storage types
+  const dataString = getStorage(true).getItem(fullKey) || getStorage(false).getItem(fullKey);
+
   if (!dataString) {
     return null;
   }
-  
+
   try {
     const data = JSON.parse(dataString);
     const now = new Date();
     const expiresAt = new Date(data.expiresAt);
-    
+
     if (now >= expiresAt) {
       // Data has expired
-      localStorage.removeItem(key);
+      getStorage(true).removeItem(fullKey);
+      getStorage(false).removeItem(fullKey);
       return null;
     }
-    
+
     return data.value;
   } catch (error) {
     console.error('Error parsing stored data', error);
     return null;
   }
+};
+
+/**
+ * Get time remaining until expiration
+ * @param {string} key - Storage key
+ * @returns {number|null} - Minutes remaining or null if not found/expired
+ */
+export const getExpirationRemaining = key => {
+  const fullKey = `${APP_NAMESPACE}_${key}`;
+
+  // Try both storage types
+  const dataString = getStorage(true).getItem(fullKey) || getStorage(false).getItem(fullKey);
+
+  if (!dataString) {
+    return null;
+  }
+
+  try {
+    const data = JSON.parse(dataString);
+    const now = new Date();
+    const expiresAt = new Date(data.expiresAt);
+
+    if (now >= expiresAt) {
+      return 0;
+    }
+
+    // Return minutes remaining
+    return Math.floor((expiresAt - now) / (60 * 1000));
+  } catch (error) {
+    console.error('Error calculating expiration time', error);
+    return null;
+  }
+};
+
+/**
+ * Create storage hook factory for React 19
+ * This will be available for components that need it
+ */
+export const createStorageHook = () => {
+  // This function returns a hook that can be used in React components
+  // Implementation would depend on whether you're using Redux or React context
+  // and would be defined elsewhere
+
+  // Example usage in a component:
+  // const { getItem, setItem } = useStorage();
+  // setItem('myKey', 'myValue');
+  // const value = getItem('myKey');
+
+  console.info('Storage hooks available for React 19 components');
 };

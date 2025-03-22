@@ -16,9 +16,9 @@ import {
   Button,
   CircularProgress,
   TextField,
-  InputAdornment
-} from '@material-ui/core';
-import { makeStyles } from '@mui/styles';
+  InputAdornment,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import InfoIcon from '@mui/icons-material/Info';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -29,194 +29,272 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ContentCopyIcon from '@mui/icons-material/FileCopy';
 import CodeIcon from '@mui/icons-material/Code';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  tableContainer: {
-    marginTop: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius,
-    boxShadow: theme.shadows[1],
-  },
-  headerCell: {
-    fontWeight: 'bold',
-    backgroundColor: theme.palette.background.default,
-  },
-  critical: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-  },
-  high: {
-    backgroundColor: theme.palette.error.light,
-    color: theme.palette.error.contrastText,
-  },
-  medium: {
-    backgroundColor: theme.palette.warning.main,
-    color: theme.palette.warning.contrastText,
-  },
-  low: {
-    backgroundColor: theme.palette.info.main,
-    color: theme.palette.info.contrastText,
-  },
-  info: {
-    backgroundColor: theme.palette.success.main,
-    color: theme.palette.success.contrastText,
-  },
-  statusSuccess: {
-    color: theme.palette.success.main,
-  },
-  statusWarning: {
-    color: theme.palette.warning.main,
-  },
-  statusError: {
-    color: theme.palette.error.main,
-  },
-  recommendation: {
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(1),
-    borderLeft: `4px solid ${theme.palette.primary.main}`,
-    marginTop: theme.spacing(1),
-  },
-  collapsible: {
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(1),
-  },
-  rowAlternate: {
-    backgroundColor: theme.palette.background.default,
-  },
-  filterContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: theme.spacing(2),
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: theme.spacing(1),
-  },
-  searchField: {
-    minWidth: 250,
-  },
-  chipContainer: {
-    display: 'flex',
-    gap: theme.spacing(1),
-    flexWrap: 'wrap',
-  },
-  chip: {
-    marginBottom: theme.spacing(1),
-  },
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing(4),
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing(3),
-  },
-  statusIcon: {
+// Using styled API instead of makeStyles
+const Root = styled('div')({
+  width: '100%',
+});
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+}));
+
+const HeaderCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+  backgroundColor: theme.palette.background.default,
+}));
+
+const SeverityChip = styled(Chip)(({ theme, severity }) => {
+  let styles = {};
+
+  switch (severity) {
+    case 'critical':
+      styles = {
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.error.contrastText,
+      };
+      break;
+    case 'high':
+      styles = {
+        backgroundColor: theme.palette.error.light,
+        color: theme.palette.error.contrastText,
+      };
+      break;
+    case 'medium':
+      styles = {
+        backgroundColor: theme.palette.warning.main,
+        color: theme.palette.warning.contrastText,
+      };
+      break;
+    case 'low':
+      styles = {
+        backgroundColor: theme.palette.info.main,
+        color: theme.palette.info.contrastText,
+      };
+      break;
+    case 'info':
+      styles = {
+        backgroundColor: theme.palette.success.main,
+        color: theme.palette.success.contrastText,
+      };
+      break;
+    default:
+      styles = {};
+  }
+
+  return styles;
+});
+
+const StatusIcon = styled('span')(({ theme, status }) => {
+  let color;
+
+  switch (status) {
+    case 'success':
+      color = theme.palette.success.main;
+      break;
+    case 'warning':
+      color = theme.palette.warning.main;
+      break;
+    case 'error':
+      color = theme.palette.error.main;
+      break;
+    default:
+      color = 'inherit';
+  }
+
+  return {
+    color,
     verticalAlign: 'middle',
     marginRight: theme.spacing(0.5),
-  },
-  headerValue: {
-    fontFamily: 'monospace',
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    padding: '3px 5px',
-    borderRadius: 3,
-    overflowX: 'auto',
-    maxWidth: 300,
-    whiteSpace: 'nowrap',
-    display: 'inline-block',
-  },
-  copyButton: {
-    padding: 2,
-  },
-  copyIcon: {
-    fontSize: '1rem',
-  },
-  severityIcon: {
+  };
+});
+
+const Recommendation = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  padding: theme.spacing(1),
+  borderLeft: `4px solid ${theme.palette.primary.main}`,
+  marginTop: theme.spacing(1),
+}));
+
+const Collapsible = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(1),
+}));
+
+const RowAlternate = styled(TableRow)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+}));
+
+const FilterContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  marginBottom: theme.spacing(2),
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: theme.spacing(1),
+}));
+
+const SearchField = styled(TextField)(({ theme }) => ({
+  minWidth: 250,
+}));
+
+const ChipContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1),
+  flexWrap: 'wrap',
+}));
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const EmptyState = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(4),
+  textAlign: 'center',
+}));
+
+const LoadingContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+}));
+
+const SeverityIconWrapper = styled('span')(({ theme, severity }) => {
+  let color;
+
+  switch (severity) {
+    case 'critical':
+    case 'high':
+      color = theme.palette.error.main;
+      break;
+    case 'medium':
+      color = theme.palette.warning.main;
+      break;
+    case 'low':
+    case 'info':
+      color = theme.palette.success.main;
+      break;
+    default:
+      color = 'inherit';
+  }
+
+  return {
+    color,
     marginRight: theme.spacing(0.5),
     fontSize: '1rem',
-  },
+  };
+});
+
+const HeaderValue = styled('div')(({ theme }) => ({
+  fontFamily: 'monospace',
+  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  padding: '3px 5px',
+  borderRadius: 3,
+  overflowX: 'auto',
+  maxWidth: 300,
+  whiteSpace: 'nowrap',
+  display: 'inline-block',
 }));
+
+const CopyButton = styled(IconButton)(({ theme }) => ({
+  padding: 2,
+}));
+
+const CopyIcon = styled(ContentCopyIcon)(({ theme }) => ({
+  fontSize: '1rem',
+}));
+
+const ReferencesList = styled('ul')({
+  margin: 0,
+});
 
 /**
  * Header Analysis component for displaying HTTP security headers findings
- * 
+ *
  * @param {Object} props - Component props
  * @param {Array} props.headers - Array of header findings
  * @param {Object} props.rawHeaders - Raw headers response data
  * @param {boolean} props.loading - Loading state
  */
-const HeaderAnalysis = ({ 
-  headers = [], 
-  rawHeaders = {}, 
-  loading = false 
-}) => {
-  const classes = useStyles();
+const HeaderAnalysis = ({ headers = [], rawHeaders = {}, loading = false }) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Toggle row expansion
-  const toggleRowExpanded = (id) => {
+  const toggleRowExpanded = id => {
     setExpandedRows(prev => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
-  
+
   // Handle filter change
-  const handleFilterChange = (filter) => {
+  const handleFilterChange = filter => {
     setActiveFilter(filter);
   };
-  
+
   // Handle search term change
-  const handleSearchChange = (event) => {
+  const handleSearchChange = event => {
     setSearchTerm(event.target.value);
   };
-  
+
   // Copy header value to clipboard
-  const copyToClipboard = (text) => {
+  const copyToClipboard = text => {
     navigator.clipboard.writeText(text).then(
       () => {
         // Success feedback could be added here
       },
-      (err) => {
+      err => {
         console.error('Could not copy text: ', err);
       }
     );
   };
-  
+
   // Get severity icon
-  const getSeverityIcon = (severity) => {
+  const getSeverityIcon = severity => {
     const severityLower = severity.toLowerCase();
-    
+
     switch (severityLower) {
       case 'critical':
       case 'high':
-        return <ErrorIcon className={`${classes.severityIcon} ${classes.statusError}`} />;
+        return (
+          <SeverityIconWrapper severity={severityLower}>
+            <ErrorIcon fontSize="small" />
+          </SeverityIconWrapper>
+        );
       case 'medium':
-        return <WarningIcon className={`${classes.severityIcon} ${classes.statusWarning}`} />;
+        return (
+          <SeverityIconWrapper severity={severityLower}>
+            <WarningIcon fontSize="small" />
+          </SeverityIconWrapper>
+        );
       case 'low':
       case 'info':
-        return <InfoIcon className={`${classes.severityIcon} ${classes.statusSuccess}`} />;
+        return (
+          <SeverityIconWrapper severity={severityLower}>
+            <InfoIcon fontSize="small" />
+          </SeverityIconWrapper>
+        );
       default:
         return null;
     }
   };
-  
+
   // Filter headers based on active filter and search term
   const filteredHeaders = headers.filter(header => {
     // Apply severity filter
     if (activeFilter !== 'all' && header.severity.toLowerCase() !== activeFilter.toLowerCase()) {
       return false;
     }
-    
+
     // Apply search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
@@ -226,10 +304,10 @@ const HeaderAnalysis = ({
         (header.recommendation && header.recommendation.toLowerCase().includes(search))
       );
     }
-    
+
     return true;
   });
-  
+
   // Calculate counts by severity
   const severityCounts = {
     critical: headers.filter(h => h.severity.toLowerCase() === 'critical').length,
@@ -238,85 +316,116 @@ const HeaderAnalysis = ({
     low: headers.filter(h => h.severity.toLowerCase() === 'low').length,
     info: headers.filter(h => h.severity.toLowerCase() === 'info').length,
   };
-  
+
   // If loading, show loading state
   if (loading) {
     return (
-      <div className={classes.loadingContainer}>
+      <LoadingContainer>
         <CircularProgress size={40} />
-      </div>
+      </LoadingContainer>
     );
   }
-  
+
   // If no headers, show empty state
   if (!headers.length) {
     return (
-      <div className={classes.emptyState}>
-        <InfoIcon style={{ fontSize: 48, color: '#ccc', marginBottom: 16 }} />
-        <Typography variant="h6">
-          No HTTP Header Issues Found
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
+      <EmptyState>
+        <InfoIcon sx={{ fontSize: 48, color: '#ccc', marginBottom: 2 }} />
+        <Typography variant="h6">No HTTP Header Issues Found</Typography>
+        <Typography variant="body2" color="text.secondary">
           Great! Your HTTP security headers appear to be properly configured.
         </Typography>
-      </div>
+      </EmptyState>
     );
   }
-  
+
   return (
-    <div className={classes.root}>
-      <div className={classes.filterContainer}>
-        <div className={classes.chipContainer}>
-          <Chip
+    <Root>
+      <FilterContainer>
+        <ChipContainer>
+          <StyledChip
             label={`All (${headers.length})`}
             onClick={() => handleFilterChange('all')}
             color={activeFilter === 'all' ? 'primary' : 'default'}
-            className={classes.chip}
           />
           {severityCounts.critical > 0 && (
-            <Chip
+            <StyledChip
               label={`Critical (${severityCounts.critical})`}
               onClick={() => handleFilterChange('critical')}
-              className={`${classes.chip} ${activeFilter === 'critical' ? classes.critical : ''}`}
+              sx={
+                activeFilter === 'critical'
+                  ? theme => ({
+                      backgroundColor: theme.palette.error.main,
+                      color: theme.palette.error.contrastText,
+                    })
+                  : {}
+              }
               icon={<ErrorIcon />}
             />
           )}
           {severityCounts.high > 0 && (
-            <Chip
+            <StyledChip
               label={`High (${severityCounts.high})`}
               onClick={() => handleFilterChange('high')}
-              className={`${classes.chip} ${activeFilter === 'high' ? classes.high : ''}`}
+              sx={
+                activeFilter === 'high'
+                  ? theme => ({
+                      backgroundColor: theme.palette.error.light,
+                      color: theme.palette.error.contrastText,
+                    })
+                  : {}
+              }
               icon={<ErrorIcon />}
             />
           )}
           {severityCounts.medium > 0 && (
-            <Chip
+            <StyledChip
               label={`Medium (${severityCounts.medium})`}
               onClick={() => handleFilterChange('medium')}
-              className={`${classes.chip} ${activeFilter === 'medium' ? classes.medium : ''}`}
+              sx={
+                activeFilter === 'medium'
+                  ? theme => ({
+                      backgroundColor: theme.palette.warning.main,
+                      color: theme.palette.warning.contrastText,
+                    })
+                  : {}
+              }
               icon={<WarningIcon />}
             />
           )}
           {severityCounts.low > 0 && (
-            <Chip
+            <StyledChip
               label={`Low (${severityCounts.low})`}
               onClick={() => handleFilterChange('low')}
-              className={`${classes.chip} ${activeFilter === 'low' ? classes.low : ''}`}
+              sx={
+                activeFilter === 'low'
+                  ? theme => ({
+                      backgroundColor: theme.palette.info.main,
+                      color: theme.palette.info.contrastText,
+                    })
+                  : {}
+              }
               icon={<InfoIcon />}
             />
           )}
           {severityCounts.info > 0 && (
-            <Chip
+            <StyledChip
               label={`Info (${severityCounts.info})`}
               onClick={() => handleFilterChange('info')}
-              className={`${classes.chip} ${activeFilter === 'info' ? classes.info : ''}`}
+              sx={
+                activeFilter === 'info'
+                  ? theme => ({
+                      backgroundColor: theme.palette.success.main,
+                      color: theme.palette.success.contrastText,
+                    })
+                  : {}
+              }
               icon={<InfoIcon />}
             />
           )}
-        </div>
-        
-        <TextField
-          className={classes.searchField}
+        </ChipContainer>
+
+        <SearchField
           placeholder="Search headers"
           variant="outlined"
           size="small"
@@ -330,16 +439,14 @@ const HeaderAnalysis = ({
             ),
           }}
         />
-      </div>
-      
+      </FilterContainer>
+
       {filteredHeaders.length === 0 ? (
-        <div className={classes.emptyState}>
-          <Typography variant="body1">
-            No HTTP headers match your filters
-          </Typography>
-          <Button 
-            variant="text" 
-            color="primary" 
+        <EmptyState>
+          <Typography variant="body1">No HTTP headers match your filters</Typography>
+          <Button
+            variant="text"
+            color="primary"
             onClick={() => {
               setActiveFilter('all');
               setSearchTerm('');
@@ -347,101 +454,138 @@ const HeaderAnalysis = ({
           >
             Clear Filters
           </Button>
-        </div>
+        </EmptyState>
       ) : (
-        <TableContainer component={Paper} className={classes.tableContainer}>
+        <StyledTableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell className={classes.headerCell}>Severity</TableCell>
-                <TableCell className={classes.headerCell}>Header</TableCell>
-                <TableCell className={classes.headerCell}>Issue</TableCell>
-                <TableCell className={classes.headerCell}>Current Value</TableCell>
-                <TableCell className={classes.headerCell} align="right">Actions</TableCell>
+                <HeaderCell>Severity</HeaderCell>
+                <HeaderCell>Header</HeaderCell>
+                <HeaderCell>Issue</HeaderCell>
+                <HeaderCell>Current Value</HeaderCell>
+                <HeaderCell align="right">Actions</HeaderCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredHeaders.map((header, index) => {
                 const rowId = `header-${index}`;
                 const isExpanded = expandedRows[rowId] || false;
-                
+                const severityLower = header.severity.toLowerCase();
+
                 return (
                   <React.Fragment key={rowId}>
-                    <TableRow className={index % 2 === 1 ? classes.rowAlternate : ''}>
-                      <TableCell>
-                        <Chip
-                          label={header.severity}
-                          size="small"
-                          className={classes[header.severity.toLowerCase()]}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {header.title}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {header.description?.length > 100 
-                            ? `${header.description.substring(0, 100)}...` 
-                            : header.description}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        {header.evidence ? (
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <div className={classes.headerValue}>{header.evidence}</div>
-                            <Tooltip title="Copy to clipboard">
-                              <IconButton 
-                                className={classes.copyButton}
-                                onClick={() => copyToClipboard(header.evidence)}
-                              >
-                                <ContentCopyIcon className={classes.copyIcon} />
-                              </IconButton>
-                            </Tooltip>
-                          </div>
-                        ) : (
-                          <Typography variant="body2" color="textSecondary">
-                            Not set
+                    {index % 2 === 1 ? (
+                      <RowAlternate>
+                        <TableCell>
+                          <Chip
+                            label={header.severity}
+                            size="small"
+                            sx={theme => SeverityChip({ theme, severity: severityLower })}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{header.title}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {header.description?.length > 100
+                              ? `${header.description.substring(0, 100)}...`
+                              : header.description}
                           </Typography>
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small" onClick={() => toggleRowExpanded(rowId)}>
-                          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        <TableCell>
+                          {header.evidence ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <HeaderValue>{header.evidence}</HeaderValue>
+                              <Tooltip title="Copy to clipboard">
+                                <CopyButton onClick={() => copyToClipboard(header.evidence)}>
+                                  <CopyIcon />
+                                </CopyButton>
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              Not set
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton size="small" onClick={() => toggleRowExpanded(rowId)}>
+                            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                          </IconButton>
+                        </TableCell>
+                      </RowAlternate>
+                    ) : (
+                      <TableRow>
+                        <TableCell>
+                          <Chip
+                            label={header.severity}
+                            size="small"
+                            sx={theme => SeverityChip({ theme, severity: severityLower })}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{header.title}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {header.description?.length > 100
+                              ? `${header.description.substring(0, 100)}...`
+                              : header.description}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {header.evidence ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <HeaderValue>{header.evidence}</HeaderValue>
+                              <Tooltip title="Copy to clipboard">
+                                <CopyButton onClick={() => copyToClipboard(header.evidence)}>
+                                  <CopyIcon />
+                                </CopyButton>
+                              </Tooltip>
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              Not set
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton size="small" onClick={() => toggleRowExpanded(rowId)}>
+                            {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    )}
                     <TableRow>
                       <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
                         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                          <Box className={classes.collapsible}>
+                          <Collapsible>
                             <Typography variant="subtitle2" gutterBottom>
                               Full Description:
                             </Typography>
                             <Typography variant="body2" paragraph>
                               {header.description}
                             </Typography>
-                            
+
                             {header.recommendation && (
-                              <div>
+                              <Box>
                                 <Typography variant="subtitle2" gutterBottom>
                                   Recommendation:
                                 </Typography>
-                                <div className={classes.recommendation}>
-                                  <Typography variant="body2">
-                                    {header.recommendation}
-                                  </Typography>
-                                </div>
-                              </div>
+                                <Recommendation>
+                                  <Typography variant="body2">{header.recommendation}</Typography>
+                                </Recommendation>
+                              </Box>
                             )}
-                            
+
                             {header.references && header.references.length > 0 && (
-                              <div style={{ marginTop: 16 }}>
+                              <Box sx={{ marginTop: 2 }}>
                                 <Typography variant="subtitle2" gutterBottom>
                                   References:
                                 </Typography>
-                                <ul style={{ margin: 0 }}>
+                                <ReferencesList>
                                   {header.references.map((ref, idx) => (
                                     <li key={idx}>
                                       <Typography variant="body2">
@@ -451,10 +595,10 @@ const HeaderAnalysis = ({
                                       </Typography>
                                     </li>
                                   ))}
-                                </ul>
-                              </div>
+                                </ReferencesList>
+                              </Box>
                             )}
-                          </Box>
+                          </Collapsible>
                         </Collapse>
                       </TableCell>
                     </TableRow>
@@ -463,12 +607,12 @@ const HeaderAnalysis = ({
               })}
             </TableBody>
           </Table>
-        </TableContainer>
+        </StyledTableContainer>
       )}
-      
+
       {/* Show Raw Headers if available */}
       {Object.keys(rawHeaders).length > 0 && (
-        <Box mt={4}>
+        <Box sx={{ mt: 4 }}>
           <Typography variant="h6" gutterBottom>
             Raw Headers
           </Typography>
@@ -477,36 +621,49 @@ const HeaderAnalysis = ({
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell className={classes.headerCell}>Header</TableCell>
-                    <TableCell className={classes.headerCell}>Value</TableCell>
+                    <HeaderCell>Header</HeaderCell>
+                    <HeaderCell>Value</HeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.entries(rawHeaders).map(([key, value], index) => (
-                    <TableRow key={key} className={index % 2 === 1 ? classes.rowAlternate : ''}>
-                      <TableCell>{key}</TableCell>
-                      <TableCell>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <div className={classes.headerValue}>{value}</div>
-                          <Tooltip title="Copy to clipboard">
-                            <IconButton 
-                              className={classes.copyButton}
-                              onClick={() => copyToClipboard(value)}
-                            >
-                              <ContentCopyIcon className={classes.copyIcon} />
-                            </IconButton>
-                          </Tooltip>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {Object.entries(rawHeaders).map(([key, value], index) =>
+                    index % 2 === 1 ? (
+                      <RowAlternate key={key}>
+                        <TableCell>{key}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <HeaderValue>{value}</HeaderValue>
+                            <Tooltip title="Copy to clipboard">
+                              <CopyButton onClick={() => copyToClipboard(value)}>
+                                <CopyIcon />
+                              </CopyButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </RowAlternate>
+                    ) : (
+                      <TableRow key={key}>
+                        <TableCell>{key}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <HeaderValue>{value}</HeaderValue>
+                            <Tooltip title="Copy to clipboard">
+                              <CopyButton onClick={() => copyToClipboard(value)}>
+                                <CopyIcon />
+                              </CopyButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
           </Paper>
         </Box>
       )}
-    </div>
+    </Root>
   );
 };
 

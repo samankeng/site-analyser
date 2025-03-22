@@ -1,54 +1,56 @@
 import React from 'react';
-import { CircularProgress, Typography, Box } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { CircularProgress, Typography, Box, styled } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing(3),
-    width: '100%',
-  },
-  fullPage: {
+// Create styled components using emotion instead of makeStyles
+const LoaderContainer = styled(Box)(({ theme, isFullPage }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: theme.spacing(3),
+  width: '100%',
+  ...(isFullPage && {
     height: '100vh',
     position: 'fixed',
     top: 0,
     left: 0,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     zIndex: 1300,
-  },
-  progress: {
-    marginBottom: theme.spacing(2),
-  },
-  text: {
-    textAlign: 'center',
-  },
-  colorPrimary: {
-    color: theme.palette.primary.main,
-  },
-  colorSecondary: {
-    color: theme.palette.secondary.main,
-  },
-  colorWarning: {
-    color: theme.palette.warning.main,
-  },
-  progressWrapper: {
-    position: 'relative',
-    display: 'inline-flex',
-  },
-  progressLabel: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  }),
 }));
+
+const StyledProgress = styled(CircularProgress)(({ theme, colorVariant }) => ({
+  marginBottom: theme.spacing(2),
+  ...(colorVariant === 'primary' && {
+    color: theme.palette.primary.main,
+  }),
+  ...(colorVariant === 'secondary' && {
+    color: theme.palette.secondary.main,
+  }),
+  ...(colorVariant === 'warning' && {
+    color: theme.palette.warning.main,
+  }),
+}));
+
+const ProgressWrapper = styled('div')({
+  position: 'relative',
+  display: 'inline-flex',
+});
+
+const ProgressLabel = styled('div')({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+const StyledText = styled(Typography)({
+  textAlign: 'center',
+});
 
 /**
  * Loader component for displaying loading states
@@ -68,8 +70,6 @@ const Loader = ({
   value = 0,
   showValue = false,
 }) => {
-  const classes = useStyles();
-
   const getSize = () => {
     switch (size) {
       case 'small':
@@ -82,51 +82,33 @@ const Loader = ({
     }
   };
 
-  const getColorClass = () => {
-    switch (color) {
-      case 'secondary':
-        return classes.colorSecondary;
-      case 'warning':
-        return classes.colorWarning;
-      case 'primary':
-      default:
-        return classes.colorPrimary;
-    }
-  };
-
   const renderLoader = () => {
-    const circularProgress = value > 0 ? (
-      <div className={classes.progressWrapper}>
-        <CircularProgress
-          variant="determinate"
-          value={value}
-          size={getSize()}
-          className={`${classes.progress} ${getColorClass()}`}
-        />
-        {showValue && (
-          <div className={classes.progressLabel}>
-            <Typography variant="caption" component="div" color="textSecondary">
-              {`${Math.round(value)}%`}
-            </Typography>
-          </div>
-        )}
-      </div>
-    ) : (
-      <CircularProgress
-        size={getSize()}
-        className={`${classes.progress} ${getColorClass()}`}
-      />
-    );
+    const circularProgress =
+      value > 0 ? (
+        <ProgressWrapper>
+          <StyledProgress
+            variant="determinate"
+            value={value}
+            size={getSize()}
+            colorVariant={color}
+          />
+          {showValue && (
+            <ProgressLabel>
+              <Typography variant="caption" component="div" color="textSecondary">
+                {`${Math.round(value)}%`}
+              </Typography>
+            </ProgressLabel>
+          )}
+        </ProgressWrapper>
+      ) : (
+        <StyledProgress size={getSize()} colorVariant={color} />
+      );
 
     return (
-      <Box className={`${classes.root} ${fullPage ? classes.fullPage : ''}`}>
+      <LoaderContainer isFullPage={fullPage}>
         {circularProgress}
-        {text && (
-          <Typography variant="body2" className={classes.text}>
-            {text}
-          </Typography>
-        )}
-      </Box>
+        {text && <StyledText variant="body2">{text}</StyledText>}
+      </LoaderContainer>
     );
   };
 

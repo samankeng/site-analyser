@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 // Initial state
 const initialState = {
   isAuthenticated: false,
   user: null,
-  loading: true
+  loading: true,
 };
 
 // Create context
@@ -19,24 +19,24 @@ const authReducer = (state, action) => {
         ...state,
         isAuthenticated: true,
         user: action.payload,
-        loading: false
+        loading: false,
       };
     case 'LOGOUT':
       return {
         ...state,
         isAuthenticated: false,
         user: null,
-        loading: false
+        loading: false,
       };
     case 'SET_LOADING':
       return {
         ...state,
-        loading: action.payload
+        loading: action.payload,
       };
     case 'UPDATE_USER':
       return {
         ...state,
-        user: { ...state.user, ...action.payload }
+        user: { ...state.user, ...action.payload },
       };
     default:
       return state;
@@ -53,22 +53,22 @@ export const AuthProvider = ({ children }) => {
     if (reduxAuthState.isAuthenticated && reduxAuthState.user) {
       dispatch({
         type: 'LOGIN_SUCCESS',
-        payload: reduxAuthState.user
+        payload: reduxAuthState.user,
       });
     } else if (!reduxAuthState.isAuthenticated && reduxAuthState.loading === false) {
       dispatch({ type: 'LOGOUT' });
     }
-    
+
     dispatch({
       type: 'SET_LOADING',
-      payload: reduxAuthState.loading
+      payload: reduxAuthState.loading,
     });
   }, [reduxAuthState]);
 
   // Expose the context value
   const value = {
     ...state,
-    dispatch
+    dispatch,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

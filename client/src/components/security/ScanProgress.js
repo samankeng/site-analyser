@@ -13,9 +13,9 @@ import {
   Step,
   StepLabel,
   StepContent,
-  useMediaQuery
-} from '@material-ui/core';
-import { makeStyles, useTheme } from '@mui/styles';
+  useMediaQuery,
+} from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -28,104 +28,125 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import WarningIcon from '@mui/icons-material/Warning';
 import { formatDuration } from '../../utils/formatters';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    padding: theme.spacing(3),
+// Using styled API instead of makeStyles
+const Root = styled(Paper)(({ theme }) => ({
+  width: '100%',
+  padding: theme.spacing(3),
+}));
+
+const Header = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: theme.spacing(2),
+}));
+
+const UrlChip = styled(Chip)(({ theme }) => ({
+  padding: theme.spacing(1),
+  fontSize: '1rem',
+}));
+
+const ProgressContainer = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const ProgressText = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(0.5),
+}));
+
+const InfoGrid = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const InfoItem = styled(Grid)(({ theme }) => ({
+  textAlign: 'center',
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.default,
+}));
+
+const InfoValue = styled(Typography)(({ theme }) => ({
+  fontWeight: 'bold',
+  fontSize: '1.2rem',
+}));
+
+const InfoLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: '0.875rem',
+}));
+
+const ActionsContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  gap: theme.spacing(2),
+  marginTop: theme.spacing(3),
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(3, 0),
+}));
+
+const StyledStepper = styled(Stepper)(({ theme }) => ({
+  backgroundColor: 'transparent',
+}));
+
+const StepIcon = styled('span')(({ theme }) => ({
+  marginRight: theme.spacing(1),
+}));
+
+const StyledStepContent = styled(StepContent)(({ theme }) => ({
+  paddingBottom: theme.spacing(2),
+}));
+
+const StepperContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(3),
+}));
+
+const LoadingContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'column',
+  padding: theme.spacing(4),
+}));
+
+const EstimatedTime = styled(Typography)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+  fontStyle: 'italic',
+}));
+
+const CancelButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.grey[300],
+  '&:hover': {
+    backgroundColor: theme.palette.grey[400],
   },
-  header: {
-    marginBottom: theme.spacing(3),
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: theme.spacing(2),
-  },
-  urlChip: {
-    padding: theme.spacing(1),
-    fontSize: '1rem',
-  },
-  progressContainer: {
-    marginBottom: theme.spacing(3),
-  },
-  progressText: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(0.5),
-  },
-  infoGrid: {
-    marginBottom: theme.spacing(3),
-  },
-  infoItem: {
-    textAlign: 'center',
-    padding: theme.spacing(2),
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.default,
-  },
-  infoValue: {
-    fontWeight: 'bold',
-    fontSize: '1.2rem',
-  },
-  infoLabel: {
-    color: theme.palette.text.secondary,
-    fontSize: '0.875rem',
-  },
-  actionsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: theme.spacing(2),
-    marginTop: theme.spacing(3),
-  },
-  divider: {
-    margin: theme.spacing(3, 0),
-  },
-  stepper: {
-    backgroundColor: 'transparent',
-  },
-  stepIcon: {
-    marginRight: theme.spacing(1),
-  },
-  stepContent: {
-    paddingBottom: theme.spacing(2),
-  },
-  stepperContainer: {
-    marginTop: theme.spacing(3),
-  },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-    padding: theme.spacing(4),
-  },
-  inProgress: {
-    color: theme.palette.primary.main,
-  },
-  completed: {
-    color: theme.palette.success.main,
-  },
-  warning: {
-    color: theme.palette.warning.main,
-  },
-  error: {
-    color: theme.palette.error.main,
-  },
-  estimatedTime: {
-    marginTop: theme.spacing(1),
-    fontStyle: 'italic',
-  },
-  cancelButton: {
-    backgroundColor: theme.palette.grey[300],
-    '&:hover': {
-      backgroundColor: theme.palette.grey[400],
-    },
-  },
+}));
+
+// Status icon styles
+const IconCompleted = styled(CheckCircleIcon)(({ theme }) => ({
+  color: theme.palette.success.main,
+}));
+
+const IconError = styled(ErrorIcon)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
+
+const IconCancel = styled(CancelIcon)(({ theme }) => ({
+  color: theme.palette.error.main,
+}));
+
+const IconProgress = styled(CircularProgress)(({ theme }) => ({
+  color: theme.palette.primary.main,
 }));
 
 /**
  * Scan progress component for displaying the current status of a security scan
- * 
+ *
  * @param {Object} props - Component props
  * @param {Object} props.scan - Scan object with status and progress information
  * @param {Function} props.onCancel - Function called when user cancels the scan
@@ -133,35 +154,28 @@ const useStyles = makeStyles((theme) => ({
  * @param {Function} props.onNewScan - Function called when user wants to start a new scan
  * @param {boolean} props.loading - Whether scan data is loading
  */
-const ScanProgress = ({ 
-  scan = {}, 
-  onCancel, 
-  onViewResults, 
-  onNewScan,
-  loading = false 
-}) => {
-  const classes = useStyles();
+const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading = false }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
-  
+
   // Start timer when scan is in progress
   useEffect(() => {
     let timer;
-    
+
     if (scan.status === 'in_progress' || scan.status === 'pending') {
       timer = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
     }
-    
+
     return () => {
       if (timer) clearInterval(timer);
     };
   }, [scan.status]);
-  
+
   // Update active step based on progress
   useEffect(() => {
     if (scan.progress >= 75) {
@@ -174,63 +188,63 @@ const ScanProgress = ({
       setActiveStep(0);
     }
   }, [scan.progress]);
-  
+
   // Calculate estimated remaining time
   const getEstimatedTimeRemaining = () => {
     if (!scan.estimatedCompletionTime) return null;
-    
+
     const now = new Date();
     const completionTime = new Date(scan.estimatedCompletionTime);
     const remainingMs = completionTime - now;
-    
+
     if (remainingMs <= 0) return 'Finalizing...';
-    
+
     // Convert to seconds
     const remainingSeconds = Math.floor(remainingMs / 1000);
     return formatDuration(remainingSeconds);
   };
-  
+
   // Get status icon
-  const getStatusIcon = (status) => {
+  const getStatusIcon = status => {
     switch (status) {
       case 'completed':
-        return <CheckCircleIcon className={classes.completed} />;
+        return <IconCompleted />;
       case 'failed':
-        return <ErrorIcon className={classes.error} />;
+        return <IconError />;
       case 'cancelled':
-        return <CancelIcon className={classes.error} />;
+        return <IconCancel />;
       case 'in_progress':
-        return <CircularProgress size={20} className={classes.inProgress} />;
+        return <IconProgress size={20} />;
       case 'pending':
-        return <CircularProgress size={20} className={classes.inProgress} />;
+        return <IconProgress size={20} />;
       default:
         return null;
     }
   };
-  
+
   // Get scan stage steps
   const getScanSteps = () => {
     const steps = [
       {
         label: 'Initializing Scan',
-        icon: <BugReportIcon className={classes.stepIcon} />,
-        description: 'Setting up scan parameters and preparing security analyzers.'
+        icon: <BugReportIcon sx={{ mr: 1 }} />,
+        description: 'Setting up scan parameters and preparing security analyzers.',
       },
       {
         label: 'SSL/TLS Analysis',
-        icon: <LockIcon className={classes.stepIcon} />,
-        description: 'Analyzing SSL certificates, protocols, and cipher configurations.'
+        icon: <LockIcon sx={{ mr: 1 }} />,
+        description: 'Analyzing SSL certificates, protocols, and cipher configurations.',
       },
       {
         label: 'Security Headers & Port Scanning',
-        icon: <LanguageIcon className={classes.stepIcon} />,
-        description: 'Evaluating HTTP security headers and checking for open ports.'
+        icon: <LanguageIcon sx={{ mr: 1 }} />,
+        description: 'Evaluating HTTP security headers and checking for open ports.',
       },
       {
         label: 'Vulnerability Assessment',
-        icon: <SpeedIcon className={classes.stepIcon} />,
-        description: 'Conducting in-depth analysis of potential security vulnerabilities.'
-      }
+        icon: <SpeedIcon sx={{ mr: 1 }} />,
+        description: 'Conducting in-depth analysis of potential security vulnerabilities.',
+      },
     ];
 
     return steps;
@@ -239,151 +253,127 @@ const ScanProgress = ({
   // Render loading state
   if (loading) {
     return (
-      <Paper className={classes.root}>
-        <Box className={classes.loadingContainer}>
+      <Root>
+        <LoadingContainer>
           <CircularProgress />
-          <Typography variant="h6" style={{ marginTop: 16 }}>
+          <Typography variant="h6" sx={{ mt: 2 }}>
             Loading scan information...
           </Typography>
-        </Box>
-      </Paper>
+        </LoadingContainer>
+      </Root>
     );
   }
 
   // Render main scan progress view
   return (
-    <Paper className={classes.root}>
+    <Root>
       {/* Scan Header */}
-      <Box className={classes.header}>
+      <Header>
         <Typography variant="h5">Security Scan Progress</Typography>
         {scan.targetUrl && (
-          <Chip 
-            icon={<WifiIcon />} 
-            label={scan.targetUrl} 
-            className={classes.urlChip} 
-            color="primary" 
-            variant="outlined"
-          />
+          <UrlChip icon={<WifiIcon />} label={scan.targetUrl} color="primary" variant="outlined" />
         )}
-      </Box>
+      </Header>
 
       {/* Overall Progress */}
-      <Box className={classes.progressContainer}>
-        <LinearProgress 
-          variant="determinate" 
-          value={scan.progress || 0} 
+      <ProgressContainer>
+        <LinearProgress
+          variant="determinate"
+          value={scan.progress || 0}
           color={
-            scan.status === 'failed' ? 'secondary' : 
-            scan.status === 'completed' ? 'primary' : 'primary'
+            scan.status === 'failed' ? 'error' : scan.status === 'completed' ? 'primary' : 'primary'
           }
         />
-        <Box className={classes.progressText}>
-          <Typography variant="body2">
-            {`${scan.progress || 0}% Complete`}
-          </Typography>
+        <ProgressText>
+          <Typography variant="body2">{`${scan.progress || 0}% Complete`}</Typography>
           {scan.status === 'in_progress' && (
-            <Typography variant="body2" className={classes.estimatedTime}>
+            <EstimatedTime variant="body2">
               Estimated Time Remaining: {getEstimatedTimeRemaining() || 'Calculating...'}
-            </Typography>
+            </EstimatedTime>
           )}
-        </Box>
-      </Box>
+        </ProgressText>
+      </ProgressContainer>
 
       {/* Scan Information Grid */}
-      <Grid container spacing={2} className={classes.infoGrid}>
-        <Grid item xs={12} sm={4} className={classes.infoItem}>
-          <Typography className={classes.infoLabel}>Status</Typography>
-          <Box display="flex" justifyContent="center" alignItems="center">
+      <InfoGrid container spacing={2}>
+        <InfoItem item xs={12} sm={4}>
+          <InfoLabel>Status</InfoLabel>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {getStatusIcon(scan.status)}
-            <Typography className={classes.infoValue} style={{ marginLeft: 8 }}>
+            <InfoValue sx={{ ml: 1 }}>
               {scan.status ? scan.status.replace('_', ' ').toUpperCase() : 'N/A'}
-            </Typography>
+            </InfoValue>
           </Box>
-        </Grid>
-        <Grid item xs={12} sm={4} className={classes.infoItem}>
-          <Typography className={classes.infoLabel}>Time Elapsed</Typography>
-          <Typography className={classes.infoValue}>
-            {formatDuration(timeElapsed)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} sm={4} className={classes.infoItem}>
-          <Typography className={classes.infoLabel}>Detected Issues</Typography>
-          <Typography 
-            className={classes.infoValue} 
-            color={scan.issues && scan.issues.length > 0 ? 'error' : 'inherit'}
+        </InfoItem>
+        <InfoItem item xs={12} sm={4}>
+          <InfoLabel>Time Elapsed</InfoLabel>
+          <InfoValue>{formatDuration(timeElapsed)}</InfoValue>
+        </InfoItem>
+        <InfoItem item xs={12} sm={4}>
+          <InfoLabel>Detected Issues</InfoLabel>
+          <InfoValue
+            sx={{ color: scan.issues && scan.issues.length > 0 ? 'error.main' : 'inherit' }}
           >
             {scan.issues ? scan.issues.length : 0}
-          </Typography>
-        </Grid>
-      </Grid>
+          </InfoValue>
+        </InfoItem>
+      </InfoGrid>
 
       {/* Scan Stage Stepper */}
-      <Box className={classes.stepperContainer}>
-        <Stepper 
-          activeStep={activeStep} 
-          orientation="vertical" 
-          className={classes.stepper}
-        >
+      <StepperContainer>
+        <StyledStepper activeStep={activeStep} orientation="vertical">
           {getScanSteps().map((step, index) => (
             <Step key={step.label}>
-              <StepLabel 
+              <StepLabel
                 icon={step.icon}
                 StepIconProps={{
-                  classes: {
-                    root: classes[
-                      index < activeStep ? 'completed' : 
-                      index === activeStep ? 'inProgress' : ''
-                    ]
-                  }
+                  sx: {
+                    color:
+                      index < activeStep
+                        ? 'success.main'
+                        : index === activeStep
+                        ? 'primary.main'
+                        : 'inherit',
+                  },
                 }}
               >
                 {step.label}
               </StepLabel>
-              <StepContent className={classes.stepContent}>
+              <StyledStepContent>
                 <Typography variant="body2">{step.description}</Typography>
-              </StepContent>
+              </StyledStepContent>
             </Step>
           ))}
-        </Stepper>
-      </Box>
+        </StyledStepper>
+      </StepperContainer>
 
       {/* Action Buttons */}
-      <Divider className={classes.divider} />
-      <Box className={classes.actionsContainer}>
+      <StyledDivider />
+      <ActionsContainer>
         {/* Cancel Scan Button */}
         {(scan.status === 'pending' || scan.status === 'in_progress') && (
-          <Button 
-            variant="contained" 
-            className={classes.cancelButton}
-            onClick={onCancel}
-          >
+          <CancelButton variant="contained" onClick={onCancel}>
             Cancel Scan
-          </Button>
+          </CancelButton>
         )}
 
         {/* View Results Button */}
         {(scan.status === 'completed' || scan.status === 'failed') && (
-          <Button 
-            variant="contained" 
-            color="primary"
-            onClick={onViewResults}
-          >
+          <Button variant="contained" color="primary" onClick={onViewResults}>
             View Results
           </Button>
         )}
 
         {/* New Scan Button */}
-        {(scan.status === 'completed' || scan.status === 'failed' || scan.status === 'cancelled') && (
-          <Button 
-            variant="outlined" 
-            color="primary"
-            onClick={onNewScan}
-          >
+        {(scan.status === 'completed' ||
+          scan.status === 'failed' ||
+          scan.status === 'cancelled') && (
+          <Button variant="outlined" color="primary" onClick={onNewScan}>
             Start New Scan
           </Button>
         )}
-      </Box>
-    </Paper>
+      </ActionsContainer>
+    </Root>
   );
 };
 

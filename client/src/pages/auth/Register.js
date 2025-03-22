@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Container,
   Typography,
@@ -6,46 +6,47 @@ import {
   Button,
   Paper,
   Link,
-  Grid,
   FormControlLabel,
   Checkbox,
-} from '@material-ui/core';
-import { makeStyles } from '@mui/styles';
+} from '@mui/material';
+import { Grid } from '@mui/system/Grid';
+import { styled } from '@mui/material/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { useAlert } from '../../contexts/AlertContext';
 import { isValidEmail as validateEmail, validatePassword } from '../../utils/validators';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.palette.background.default,
-  },
-  paper: {
-    padding: theme.spacing(4),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    maxWidth: 400,
-    width: '100%',
-  },
-  form: {
-    width: '100%',
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: theme.palette.background.default,
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  maxWidth: 400,
+  width: '100%',
+}));
+
+const StyledForm = styled('form')(({ theme }) => ({
+  width: '100%',
+  marginTop: theme.spacing(1),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(3, 0, 2),
 }));
 
 const Register = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { showAlert } = useAlert();
+  const { addAlert } = useAlert(); // Updated from showAlert to addAlert
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -83,8 +84,24 @@ const Register = () => {
     }
 
     const passwordValidation = validatePassword(formData.password);
+    // Fix: Handle the case where passwordValidation is an object
     if (passwordValidation !== true) {
-      newErrors.password = passwordValidation;
+      // If it's an object with helperText, use that
+      if (typeof passwordValidation === 'object' && passwordValidation.helperText) {
+        newErrors.password = passwordValidation.helperText;
+      }
+      // Otherwise if it's an object with errors
+      else if (typeof passwordValidation === 'object' && passwordValidation.errors) {
+        newErrors.password = passwordValidation.errors.join(', ');
+      }
+      // If it's a simple string message
+      else if (typeof passwordValidation === 'string') {
+        newErrors.password = passwordValidation;
+      }
+      // Default fallback
+      else {
+        newErrors.password = 'Invalid password';
+      }
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -117,29 +134,29 @@ const Register = () => {
       const success = await register(userData);
 
       if (success) {
-        showAlert('Registration successful', 'success');
+        addAlert('Registration successful', 'success');
         navigate('/dashboard');
       } else {
-        showAlert('Registration failed', 'error');
+        addAlert('Registration failed', 'error');
       }
     } catch (error) {
-      showAlert('Registration error', 'error');
+      addAlert('Registration error', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs" className={classes.root}>
-      <Paper elevation={6} className={classes.paper}>
+    <StyledContainer component="main" maxWidth="xs">
+      <StyledPaper elevation={6}>
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <form className={classes.form} onSubmit={handleSubmit}>
+        <StyledForm onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
-                autoComplete="fname"
+                autoComplete="given-name"
                 name="firstName"
                 variant="outlined"
                 required
@@ -161,7 +178,7 @@ const Register = () => {
                 id="lastName"
                 label="Last Name"
                 name="lastName"
-                autoComplete="lname"
+                autoComplete="family-name"
                 value={formData.lastName}
                 onChange={handleChange}
                 error={!!errors.lastName}
@@ -192,7 +209,7 @@ const Register = () => {
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
                 error={!!errors.password}
@@ -233,26 +250,25 @@ const Register = () => {
               )}
             </Grid>
           </Grid>
-          <Button
+          <SubmitButton
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            className={classes.submit}
             disabled={loading}
           >
             {loading ? 'Signing Up...' : 'Sign Up'}
-          </Button>
+          </SubmitButton>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link component={RouterLink} to="/auth/login" variant="body2">
+              <Link component={RouterLink} to="/login" variant="body2">
                 Already have an account? Sign in
               </Link>
             </Grid>
           </Grid>
-        </form>
-      </Paper>
-    </Container>
+        </StyledForm>
+      </StyledPaper>
+    </StyledContainer>
   );
 };
 

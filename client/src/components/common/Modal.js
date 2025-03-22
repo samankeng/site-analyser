@@ -8,53 +8,56 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-} from '@material-ui/core';
-import { makeStyles } from '@mui/styles';
+  styled,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from './Button';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& .MuiDialog-paper': {
-      borderRadius: theme.shape.borderRadius,
-      boxShadow: theme.shadows[10],
-    },
+// Styled components using emotion instead of makeStyles
+const StyledDialog = styled(Dialog)(({ theme, isFullWidth, isFullScreen }) => ({
+  '& .MuiDialog-paper': {
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[10],
   },
-  title: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(2, 3),
-    '& h2': {
-      fontSize: '1.25rem',
-      fontWeight: 600,
-    },
-  },
-  content: {
-    padding: theme.spacing(3),
-  },
-  actions: {
-    padding: theme.spacing(2, 3),
-    borderTop: `1px solid ${theme.palette.divider}`,
-  },
-  closeButton: {
-    color: theme.palette.text.secondary,
-  },
-  fullWidth: {
+  ...(isFullWidth && {
     '& .MuiDialog-paper': {
       width: '95%',
       maxWidth: '100%',
     },
-  },
-  fullScreen: {
+  }),
+  ...(isFullScreen && {
     '& .MuiDialog-paper': {
       margin: 0,
       width: '100%',
       maxWidth: '100%',
       borderRadius: 0,
     },
+  }),
+}));
+
+const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  padding: theme.spacing(2, 3),
+  '& h2': {
+    fontSize: '1.25rem',
+    fontWeight: 600,
   },
+}));
+
+const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+  padding: theme.spacing(3),
+}));
+
+const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
+  padding: theme.spacing(2, 3),
+  borderTop: `1px solid ${theme.palette.divider}`,
+}));
+
+const CloseIconButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.text.secondary,
 }));
 
 /**
@@ -83,10 +86,9 @@ const Modal = ({
   disableBackdropClick = false,
   disableEscapeKeyDown = false,
 }) => {
-  const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('xs'));
-  
+
   // Force fullScreen on mobile if specified
   const fullScreen = propFullScreen || (isMobile && fullWidth);
 
@@ -105,7 +107,7 @@ const Modal = ({
     }
 
     return (
-      <DialogActions className={classes.actions}>
+      <StyledDialogActions>
         {actions.map((action, index) => (
           <Button
             key={index}
@@ -119,44 +121,38 @@ const Modal = ({
             {action.label}
           </Button>
         ))}
-      </DialogActions>
+      </StyledDialogActions>
     );
   };
 
   return (
-    <Dialog
+    <StyledDialog
       open={open}
       onClose={handleClose}
-      className={`${classes.root} ${fullWidth ? classes.fullWidth : ''} ${
-        fullScreen ? classes.fullScreen : ''
-      }`}
+      isFullWidth={fullWidth}
+      isFullScreen={fullScreen}
       fullWidth={fullWidth}
       fullScreen={fullScreen}
       maxWidth={maxWidth}
-      disableBackdropClick={disableBackdropClick}
+      // In MUI v6, these props have been updated
+      onBackdropClick={disableBackdropClick ? undefined : handleClose}
+      // Note: disableEscapeKeyDown is still valid
       disableEscapeKeyDown={disableEscapeKeyDown}
       aria-labelledby="modal-title"
     >
       {title && (
-        <DialogTitle disableTypography className={classes.title} id="modal-title">
+        <StyledDialogTitle disableTypography id="modal-title">
           <Typography variant="h6">{title}</Typography>
           {onClose && (
-            <IconButton
-              aria-label="close"
-              className={classes.closeButton}
-              onClick={onClose}
-              size="small"
-            >
+            <CloseIconButton aria-label="close" onClick={onClose} size="small">
               <CloseIcon />
-            </IconButton>
+            </CloseIconButton>
           )}
-        </DialogTitle>
+        </StyledDialogTitle>
       )}
-      <DialogContent className={classes.content} dividers={!title}>
-        {children}
-      </DialogContent>
+      <StyledDialogContent dividers={!title}>{children}</StyledDialogContent>
       {renderActions()}
-    </Dialog>
+    </StyledDialog>
   );
 };
 

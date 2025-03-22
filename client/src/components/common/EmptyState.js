@@ -1,37 +1,40 @@
 import React from 'react';
-import { Typography, Button, Box, Paper } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { Typography, Button, Box, Paper, styled } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(6, 3),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: theme.palette.background.paper,
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: theme.spacing(2),
-    color: theme.palette.text.secondary,
-  },
-  title: {
-    marginBottom: theme.spacing(1),
-    fontWeight: 500,
-  },
-  message: {
-    color: theme.palette.text.secondary,
-    maxWidth: 500,
-    marginBottom: theme.spacing(3),
-  },
-  button: {
-    marginTop: theme.spacing(2),
-  },
-  secondaryButton: {
-    marginTop: theme.spacing(1),
-  },
+// Create styled components using emotion instead of makeStyles
+const StyledContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(6, 3),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  textAlign: 'center',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: theme.palette.background.paper,
+}));
+
+const IconWrapper = styled('div')(({ theme }) => ({
+  fontSize: 64,
+  marginBottom: theme.spacing(2),
+  color: theme.palette.text.secondary,
+}));
+
+const StyledTitle = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  fontWeight: 500,
+}));
+
+const StyledMessage = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  maxWidth: 500,
+  marginBottom: theme.spacing(3),
+}));
+
+const PrimaryButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+}));
+
+const SecondaryButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(1),
 }));
 
 /**
@@ -44,56 +47,37 @@ const useStyles = makeStyles((theme) => ({
  * @param {Object} props.secondaryAction - Secondary action button configuration
  * @param {boolean} props.paper - Whether to wrap in Paper component
  */
-const EmptyState = ({
-  title,
-  message,
-  icon,
-  primaryAction,
-  secondaryAction,
-  paper = true,
-}) => {
-  const classes = useStyles();
-
+const EmptyState = ({ title, message, icon, primaryAction, secondaryAction, paper = true }) => {
   const content = (
-    <Box className={classes.root}>
-      {icon && <div className={classes.icon}>{icon}</div>}
-      
-      {title && (
-        <Typography variant="h5" className={classes.title}>
-          {title}
-        </Typography>
-      )}
-      
-      {message && (
-        <Typography variant="body1" className={classes.message}>
-          {message}
-        </Typography>
-      )}
-      
+    <StyledContainer>
+      {icon && <IconWrapper>{icon}</IconWrapper>}
+
+      {title && <StyledTitle variant="h5">{title}</StyledTitle>}
+
+      {message && <StyledMessage variant="body1">{message}</StyledMessage>}
+
       {primaryAction && (
-        <Button
+        <PrimaryButton
           variant="contained"
           color="primary"
           onClick={primaryAction.onClick}
-          className={classes.button}
           startIcon={primaryAction.icon}
         >
           {primaryAction.label}
-        </Button>
+        </PrimaryButton>
       )}
-      
+
       {secondaryAction && (
-        <Button
+        <SecondaryButton
           variant="text"
           color="primary"
           onClick={secondaryAction.onClick}
-          className={classes.secondaryButton}
           startIcon={secondaryAction.icon}
         >
           {secondaryAction.label}
-        </Button>
+        </SecondaryButton>
       )}
-    </Box>
+    </StyledContainer>
   );
 
   if (paper) {

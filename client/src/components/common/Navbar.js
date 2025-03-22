@@ -19,8 +19,8 @@ import {
   useTheme,
   Avatar,
   Tooltip,
-} from '@material-ui/core';
-import { makeStyles } from '@mui/styles';
+  styled,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -36,50 +36,61 @@ import { logout } from '../../store/actions/authActions';
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
+// Styled components
+const Root = styled('div')({
+  flexGrow: 1,
+});
+
+const StyledAppBar = styled(AppBar, {
+  shouldForwardProp: prop => prop !== 'open',
+})(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  }),
+}));
+
+const MenuButton = styled(IconButton)(({ theme }) => ({
+  marginRight: theme.spacing(2),
+}));
+
+const Title = styled(Typography)(({ theme }) => ({
+  flexGrow: 1,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  '& svg': {
+    marginRight: theme.spacing(1),
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    '& svg': {
-      marginRight: theme.spacing(1),
-    },
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-  },
-  drawerOpen: {
+}));
+
+const StyledDrawer = styled(Drawer, {
+  shouldForwardProp: prop => prop !== 'open',
+})(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  ...(open && {
     width: drawerWidth,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  },
-  drawerClose: {
+    '& .MuiDrawer-paper': {
+      width: drawerWidth,
+      overflowX: 'hidden',
+    },
+  }),
+  ...(!open && {
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -89,56 +100,71 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('sm')]: {
       width: 0,
     },
-  },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  },
-  avatar: {
-    marginRight: theme.spacing(1),
-    backgroundColor: theme.palette.primary.main,
-  },
-  profileButton: {
-    textTransform: 'none',
-    marginLeft: theme.spacing(2),
-  },
-  activeListItem: {
-    backgroundColor: theme.palette.action.selected,
-    '& .MuiListItemIcon-root': {
-      color: theme.palette.primary.main,
+    '& .MuiDrawer-paper': {
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      overflowX: 'hidden',
+      width: theme.spacing(7) + 1,
+      [theme.breakpoints.down('sm')]: {
+        width: 0,
+      },
     },
-    '& .MuiListItemText-primary': {
-      fontWeight: 600,
-      color: theme.palette.primary.main,
-    },
+  }),
+}));
+
+const Toolbar2 = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+}));
+
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  backgroundColor: theme.palette.primary.main,
+}));
+
+const ProfileButton = styled(Button)(({ theme }) => ({
+  textTransform: 'none',
+  marginLeft: theme.spacing(2),
+}));
+
+const ActiveListItem = styled(ListItem)(({ theme }) => ({
+  backgroundColor: theme.palette.action.selected,
+  '& .MuiListItemIcon-root': {
+    color: theme.palette.primary.main,
+  },
+  '& .MuiListItemText-primary': {
+    fontWeight: 600,
+    color: theme.palette.primary.main,
   },
 }));
 
+const RegularListItem = styled(ListItem)({});
+
 const Navbar = () => {
-  const classes = useStyles();
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationsAnchorEl, setNotificationsAnchorEl] = useState(null);
-  
-  const alerts = useSelector(state => state.alert.alerts || []);
-  const unreadAlerts = alerts.filter(alert => !alert.read).length;
 
-  const handleProfileMenuOpen = (event) => {
+  // Safely access the alerts array with a default empty array
+  // This retrieves the alerts array from the Redux store
+  const reduxState = useSelector(state => state);
+  const alertList = reduxState?.alerts?.alerts || [];
+  const unreadAlerts = alertList.filter(alert => !alert.read).length;
+
+  const handleProfileMenuOpen = event => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -146,7 +172,7 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
-  const handleNotificationsOpen = (event) => {
+  const handleNotificationsOpen = event => {
     setNotificationsAnchorEl(event.currentTarget);
   };
 
@@ -164,14 +190,14 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const handleNavigation = (path) => {
+  const handleNavigation = path => {
     navigate(path);
     if (isMobile) {
       setDrawerOpen(false);
     }
   };
 
-  const isActive = (path) => {
+  const isActive = path => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
@@ -203,33 +229,30 @@ const Navbar = () => {
   ];
 
   const renderDrawer = () => (
-    <Drawer
+    <StyledDrawer
       variant={isMobile ? 'temporary' : 'permanent'}
-      className={drawerOpen ? classes.drawerOpen : classes.drawerClose}
-      classes={{
-        paper: drawerOpen ? classes.drawerOpen : classes.drawerClose,
-      }}
       open={drawerOpen}
       onClose={handleDrawerToggle}
     >
-      <div className={classes.toolbar}>
+      <Toolbar2>
         <IconButton onClick={handleDrawerToggle}>
           <ChevronLeftIcon />
         </IconButton>
-      </div>
+      </Toolbar2>
       <Divider />
       <List>
-        {menuItems.filter(item => !item.authRequired || isAuthenticated).map((item) => (
-          <ListItem
-            button
-            key={item.text}
-            onClick={() => handleNavigation(item.path)}
-            className={isActive(item.path) ? classes.activeListItem : ''}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
-        ))}
+        {menuItems
+          .filter(item => !item.authRequired || isAuthenticated)
+          .map(item => {
+            const ListItemComponent = isActive(item.path) ? ActiveListItem : RegularListItem;
+
+            return (
+              <ListItemComponent button key={item.text} onClick={() => handleNavigation(item.path)}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemComponent>
+            );
+          })}
       </List>
       {isAuthenticated && (
         <>
@@ -244,33 +267,20 @@ const Navbar = () => {
           </List>
         </>
       )}
-    </Drawer>
+    </StyledDrawer>
   );
 
   return (
-    <div className={classes.root}>
-      <AppBar
-        position="fixed"
-        className={drawerOpen && !isMobile ? classes.appBarShift : classes.appBar}
-      >
+    <Root>
+      <StyledAppBar position="fixed" open={drawerOpen && !isMobile}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="menu"
-            onClick={handleDrawerToggle}
-          >
+          <MenuButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
             <MenuIcon />
-          </IconButton>
-          <Typography
-            variant="h6"
-            className={classes.title}
-            onClick={() => navigate('/')}
-          >
+          </MenuButton>
+          <Title variant="h6" onClick={() => navigate('/')}>
             <SecurityIcon />
             Site-Analyser
-          </Typography>
+          </Title>
 
           {isAuthenticated ? (
             <>
@@ -281,18 +291,13 @@ const Navbar = () => {
                   </Badge>
                 </IconButton>
               </Tooltip>
-              <Button
-                className={classes.profileButton}
+              <ProfileButton
                 onClick={handleProfileMenuOpen}
                 color="inherit"
-                startIcon={
-                  <Avatar className={classes.avatar}>
-                    {user?.name?.charAt(0) || <PersonIcon />}
-                  </Avatar>
-                }
+                startIcon={<StyledAvatar>{user?.name?.charAt(0) || <PersonIcon />}</StyledAvatar>}
               >
                 {!isMobile && (user?.name || 'Profile')}
-              </Button>
+              </ProfileButton>
               <Menu
                 id="profile-menu"
                 anchorEl={anchorEl}
@@ -300,16 +305,20 @@ const Navbar = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem onClick={() => {
-                  handleMenuClose();
-                  navigate('/settings/account');
-                }}>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
+                    navigate('/settings/account');
+                  }}
+                >
                   My Account
                 </MenuItem>
-                <MenuItem onClick={() => {
-                  handleMenuClose();
-                  navigate('/settings/security');
-                }}>
+                <MenuItem
+                  onClick={() => {
+                    handleMenuClose();
+                    navigate('/settings/security');
+                  }}
+                >
                   Security
                 </MenuItem>
                 <Divider />
@@ -328,19 +337,20 @@ const Navbar = () => {
                   },
                 }}
               >
-                {alerts.length > 0 ? (
-                  alerts.slice(0, 5).map((alert, index) => (
+                {alertList.length > 0 ? (
+                  alertList.slice(0, 5).map((alert, index) => (
                     <MenuItem
                       key={index}
                       onClick={() => {
                         handleNotificationsClose();
                         // Handle notification click
                       }}
-                      style={{
+                      sx={{
                         backgroundColor: alert.read ? 'inherit' : 'rgba(0, 0, 0, 0.04)',
+                        whiteSpace: 'normal',
                       }}
                     >
-                      <div style={{ whiteSpace: 'normal' }}>
+                      <div>
                         <Typography variant="subtitle2">{alert.title}</Typography>
                         <Typography variant="body2" color="textSecondary">
                           {alert.message}
@@ -351,7 +361,7 @@ const Navbar = () => {
                 ) : (
                   <MenuItem disabled>No notifications</MenuItem>
                 )}
-                {alerts.length > 5 && (
+                {alertList.length > 5 && (
                   <MenuItem
                     onClick={() => {
                       handleNotificationsClose();
@@ -376,10 +386,10 @@ const Navbar = () => {
             </>
           )}
         </Toolbar>
-      </AppBar>
+      </StyledAppBar>
       {renderDrawer()}
-      <div className={classes.toolbar} />
-    </div>
+      <Toolbar2 />
+    </Root>
   );
 };
 

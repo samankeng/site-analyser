@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
@@ -9,7 +9,6 @@ import {
   Grid,
   Avatar,
   Divider,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -184,14 +183,14 @@ const Account = () => {
         Account Settings
       </Typography>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h5" component="h2">
             Profile Information
           </Typography>
           <Button
             startIcon={editMode ? <SaveIcon /> : <EditIcon />}
-            variant={editMode ? 'contained' : 'outlined'}
+            variant={editMode ? 'filled' : 'outlined'}
             color={editMode ? 'primary' : 'secondary'}
             onClick={() => (editMode ? handleSaveProfile() : setEditMode(true))}
           >
@@ -295,7 +294,7 @@ const Account = () => {
                 </Button>
                 <Button
                   color="primary"
-                  variant="contained"
+                  variant="filled"
                   startIcon={<SaveIcon />}
                   onClick={handleSaveProfile}
                 >
@@ -307,7 +306,7 @@ const Account = () => {
         </Grid>
       </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           Security
         </Typography>
@@ -372,7 +371,7 @@ const Account = () => {
                   >
                     Cancel
                   </Button>
-                  <Button color="primary" variant="contained" onClick={handleUpdatePassword}>
+                  <Button color="primary" variant="filled" onClick={handleUpdatePassword}>
                     Update Password
                   </Button>
                 </Box>
@@ -421,7 +420,7 @@ const Account = () => {
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button
             color="error"
-            variant="contained"
+            variant="filled"
             onClick={handleDeleteAccount}
             disabled={deleteConfirmText !== user?.email}
           >
@@ -436,7 +435,7 @@ const Account = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>

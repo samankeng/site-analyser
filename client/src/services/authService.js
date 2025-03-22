@@ -1,68 +1,91 @@
 import api from './api';
 import { storeToken, removeToken, storeUser, removeUser } from '../utils/storage';
 
+/**
+ * Authentication and user management service
+ */
 const authService = {
   /**
    * Log in a user
    * @param {string} email - User's email
    * @param {string} password - User's password
-   * @returns {Promise} Login response
+   * @returns {Promise} Login response with user data and token
    */
   login: async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
 
-      // Store authentication token
-      storeToken(response.data.token);
+      const { token, user } = response.data;
 
-      // Store user data
-      storeUser(response.data.user);
+      // Store authentication token and user data
+      storeToken(token);
+      storeUser(user);
 
       return response.data;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
-      throw error;
+
+      // Enhance error message with more context
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to log in. Please check your credentials.';
+
+      const enhancedError = new Error(errorMessage);
+      enhancedError.originalError = error;
+      throw enhancedError;
     }
   },
 
   /**
    * Register a new user
    * @param {Object} userData - User registration data
-   * @returns {Promise} Registration response
+   * @returns {Promise} Registration response with user data and token
    */
   register: async userData => {
     try {
       const response = await api.post('/auth/register', userData);
 
-      // Store authentication token
-      storeToken(response.data.token);
+      const { token, user } = response.data;
 
-      // Store user data
-      storeUser(response.data.user);
+      // Store authentication token and user data
+      storeToken(token);
+      storeUser(user);
 
       return response.data;
     } catch (error) {
       console.error('Registration error:', error.response?.data || error.message);
-      throw error;
+
+      // Get validation errors if they exist
+      const validationErrors = error.response?.data?.errors;
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Registration failed. Please try again.';
+
+      const enhancedError = new Error(errorMessage);
+      enhancedError.originalError = error;
+      enhancedError.validationErrors = validationErrors;
+      throw enhancedError;
     }
   },
 
   /**
    * Log out the current user
-   * @returns {Promise} Logout response
+   * @returns {Promise<boolean>} Logout success status
    */
   logout: async () => {
     try {
+      // Attempt to notify the server about logout
       await api.post('/auth/logout');
-
-      // Remove token and user data
+    } catch (error) {
+      // Log error but continue with local logout
+      console.warn('Logout server notification failed:', error.message);
+    } finally {
+      // Always remove local tokens and user data regardless of server response
       removeToken();
       removeUser();
-
       return true;
-    } catch (error) {
-      console.error('Logout error:', error.response?.data || error.message);
-      throw error;
     }
   },
 
@@ -76,8 +99,14 @@ const authService = {
       const response = await api.post('/auth/reset-password', { email });
       return response.data;
     } catch (error) {
-      console.error('Password reset error:', error.response?.data || error.message);
-      throw error;
+      console.error('Password reset request error:', error.response?.data || error.message);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to request password reset. Please try again later.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -96,13 +125,19 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Password reset confirmation error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to reset password. The link may have expired.';
+
+      throw new Error(errorMessage);
     }
   },
 
   /**
    * Refresh authentication token
-   * @returns {Promise} New authentication token
+   * @returns {Promise<string>} New authentication token
    */
   refreshToken: async () => {
     try {
@@ -119,7 +154,7 @@ const authService = {
       removeToken();
       removeUser();
 
-      throw error;
+      throw new Error('Your session has expired. Please log in again.');
     }
   },
 
@@ -138,7 +173,16 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Profile update error:', error.response?.data || error.message);
-      throw error;
+
+      const validationErrors = error.response?.data?.errors;
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to update profile. Please try again.';
+
+      const enhancedError = new Error(errorMessage);
+      enhancedError.validationErrors = validationErrors;
+      throw enhancedError;
     }
   },
 
@@ -155,7 +199,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Password update error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to update password. Please check your current password.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -174,7 +224,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Account deletion error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to delete account. Please try again later.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -193,7 +249,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Notification settings update error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to update notification settings.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -212,7 +274,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Security settings update error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to update security settings.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -226,7 +294,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Two-factor enable error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to enable two-factor authentication.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -240,7 +314,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('Two-factor disable error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to disable two-factor authentication.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -255,7 +335,13 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('API key generation error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Failed to generate API key.';
+
+      throw new Error(errorMessage);
     }
   },
 
@@ -270,7 +356,35 @@ const authService = {
       return response.data;
     } catch (error) {
       console.error('API key revocation error:', error.response?.data || error.message);
-      throw error;
+
+      const errorMessage =
+        error.response?.data?.message || error.response?.data?.error || 'Failed to revoke API key.';
+
+      throw new Error(errorMessage);
+    }
+  },
+
+  /**
+   * Check if user is authenticated
+   * @returns {boolean} Authentication status
+   */
+  isAuthenticated: () => {
+    const token = localStorage.getItem('auth_token');
+    return !!token;
+  },
+
+  /**
+   * Get the current user from storage
+   * @returns {Object|null} User data or null if not logged in
+   */
+  getCurrentUser: () => {
+    try {
+      const userJson = localStorage.getItem('user');
+      return userJson ? JSON.parse(userJson) : null;
+    } catch (e) {
+      console.error('Error parsing user data:', e);
+      removeUser(); // Clear corrupted data
+      return null;
     }
   },
 };

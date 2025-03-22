@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Container, Typography, Grid, Paper, Button, Divider } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import ScanForm from '../../components/security/ScanForm';
 import ScanOptions from '../../components/security/ScanOptions';
 import useScan from '../../hooks/useScan';
 import { useAlert } from '../../contexts/AlertContext';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    padding: theme.spacing(4),
-  },
-  paper: {
-    padding: theme.spacing(3),
-    marginBottom: theme.spacing(3),
-  },
-  section: {
-    marginBottom: theme.spacing(3),
-  },
-  divider: {
-    margin: theme.spacing(3, 0),
-  },
-  actionButtons: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing(3),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  padding: theme.spacing(4),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+}));
+
+const Section = styled('section')(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(3, 0),
+}));
+
+const ActionButtonsContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  marginTop: theme.spacing(3),
 }));
 
 const NewScan = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const { startScan } = useScan();
-  const { showAlert } = useAlert();
+  const { addAlert } = useAlert(); // Changed from showAlert to addAlert
 
   const [scanOptions, setScanOptions] = useState({
     deepScan: false,
@@ -54,33 +56,33 @@ const NewScan = () => {
       const scanResult = await startScan(url, scanOptions);
 
       if (scanResult) {
-        showAlert('Scan initiated successfully', 'success');
+        addAlert('Scan initiated successfully', 'success');
         navigate(`/scans/${scanResult.id}`);
       } else {
-        showAlert('Failed to start scan', 'error');
+        addAlert('Failed to start scan', 'error');
       }
     } catch (error) {
-      showAlert('An error occurred while starting the scan', 'error');
+      addAlert('An error occurred while starting the scan', 'error');
     }
   };
 
   return (
-    <Container maxWidth="md" className={classes.root}>
+    <StyledContainer maxWidth="md">
       <Typography variant="h4" gutterBottom>
         New Security Scan
       </Typography>
 
-      <Paper className={classes.paper}>
-        <section className={classes.section}>
+      <StyledPaper>
+        <Section>
           <Typography variant="h6" gutterBottom>
             Scan Target
           </Typography>
           <ScanForm onScanStart={handleScanStart} fullWidth variant="outlined" />
-        </section>
+        </Section>
 
-        <Divider className={classes.divider} />
+        <StyledDivider />
 
-        <section className={classes.section}>
+        <Section>
           <Typography variant="h6" gutterBottom>
             Scan Options
           </Typography>
@@ -89,7 +91,7 @@ const NewScan = () => {
               <ScanOptions options={scanOptions} onOptionChange={handleOptionChange} />
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="text.secondary">
                 Customize your scan by selecting specific security checks:
                 <ul>
                   <li>SSL/TLS Certificate Analysis</li>
@@ -101,10 +103,10 @@ const NewScan = () => {
               </Typography>
             </Grid>
           </Grid>
-        </section>
+        </Section>
 
-        <div className={classes.actionButtons}>
-          <Button variant="outlined" color="default" onClick={() => navigate('/dashboard')}>
+        <ActionButtonsContainer>
+          <Button variant="outlined" color="inherit" onClick={() => navigate('/dashboard')}>
             Cancel
           </Button>
           <Button
@@ -117,9 +119,9 @@ const NewScan = () => {
           >
             Start Scan
           </Button>
-        </div>
-      </Paper>
-    </Container>
+        </ActionButtonsContainer>
+      </StyledPaper>
+    </StyledContainer>
   );
 };
 

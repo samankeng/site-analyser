@@ -7,9 +7,13 @@ import {
   SECURITY_SCORE_ERROR,
   RECENT_ALERTS_REQUEST,
   RECENT_ALERTS_SUCCESS,
-  RECENT_ALERTS_ERROR
+  RECENT_ALERTS_ERROR,
 } from '../actions/types';
 
+/**
+ * Initial state for dashboard data
+ * Structured to work well with React 19's rendering optimizations
+ */
 const initialState = {
   loading: false,
   securityScoreLoading: false,
@@ -17,9 +21,14 @@ const initialState = {
   recentScans: [],
   recentAlerts: [],
   securityScore: null,
-  error: null
+  error: null,
+  lastUpdated: null, // Added timestamp for React 19 change detection
 };
 
+/**
+ * Dashboard reducer - manages dashboard state
+ * Updated for React 19 and MUI v6 compatibility
+ */
 const dashboardReducer = (state = initialState, action) => {
   switch (action.type) {
     // Dashboard full data
@@ -27,22 +36,29 @@ const dashboardReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
       };
+
     case DASHBOARD_DATA_SUCCESS:
       return {
         ...state,
         loading: false,
-        recentScans: action.payload.recentScans,
-        recentAlerts: action.payload.recentAlerts,
+        recentScans: Array.isArray(action.payload.recentScans)
+          ? [...action.payload.recentScans]
+          : [],
+        recentAlerts: Array.isArray(action.payload.recentAlerts)
+          ? [...action.payload.recentAlerts]
+          : [],
         securityScore: action.payload.securityScore,
-        error: null
+        error: null,
+        lastUpdated: new Date().toISOString(),
       };
+
     case DASHBOARD_DATA_ERROR:
       return {
         ...state,
         loading: false,
-        error: action.payload
+        error: action.payload,
       };
 
     // Security Score
@@ -50,20 +66,23 @@ const dashboardReducer = (state = initialState, action) => {
       return {
         ...state,
         securityScoreLoading: true,
-        error: null
+        error: null,
       };
+
     case SECURITY_SCORE_SUCCESS:
       return {
         ...state,
         securityScoreLoading: false,
         securityScore: action.payload,
-        error: null
+        error: null,
+        lastUpdated: new Date().toISOString(),
       };
+
     case SECURITY_SCORE_ERROR:
       return {
         ...state,
         securityScoreLoading: false,
-        error: action.payload
+        error: action.payload,
       };
 
     // Recent Alerts
@@ -71,25 +90,36 @@ const dashboardReducer = (state = initialState, action) => {
       return {
         ...state,
         alertsLoading: true,
-        error: null
+        error: null,
       };
+
     case RECENT_ALERTS_SUCCESS:
       return {
         ...state,
         alertsLoading: false,
-        recentAlerts: action.payload,
-        error: null
+        recentAlerts: Array.isArray(action.payload) ? [...action.payload] : [],
+        error: null,
+        lastUpdated: new Date().toISOString(),
       };
+
     case RECENT_ALERTS_ERROR:
       return {
         ...state,
         alertsLoading: false,
-        error: action.payload
+        error: action.payload,
       };
 
     default:
       return state;
   }
 };
+
+// Export selectors for easier component access
+export const selectDashboardData = state => state.dashboard;
+export const selectSecurityScore = state => state.dashboard.securityScore;
+export const selectRecentAlerts = state => state.dashboard.recentAlerts;
+export const selectRecentScans = state => state.dashboard.recentScans;
+export const selectIsLoading = state =>
+  state.dashboard.loading || state.dashboard.securityScoreLoading || state.dashboard.alertsLoading;
 
 export default dashboardReducer;

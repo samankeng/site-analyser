@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Grid, Typography, Paper, Button } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import SecurityScoreCard from '../../components/security/SecurityScoreCard';
 import AlertsWidget from '../../components/dashboard/AlertsWidget';
 import ScanHistoryTable from '../../components/dashboard/ScanHistoryTable';
@@ -12,34 +12,35 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAlert } from '../../contexts/AlertContext';
 import { Link as RouterLink } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-  },
-  paper: {
-    padding: theme.spacing(2),
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  headerContainer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing(3),
-  },
-  newScanButton: {
-    marginLeft: theme.spacing(2),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const HeaderContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: theme.spacing(3),
+}));
+
+const NewScanButton = styled(Button)(({ theme }) => ({
+  marginLeft: theme.spacing(2),
 }));
 
 const Dashboard = () => {
-  const classes = useStyles();
   const { user } = useAuth();
   const { getRecentScans, loading } = useScan();
   const { mode, toggleThemeMode } = useTheme();
-  const { showAlert } = useAlert();
+  const { addAlert } = useAlert(); // Updated from showAlert to addAlert
 
   const [recentScans, setRecentScans] = useState([]);
   const [securityScore, setSecurityScore] = useState(null);
@@ -66,63 +67,57 @@ const Dashboard = () => {
 
         setSecurityScore(calculateSecurityScore());
       } catch (error) {
-        showAlert('Failed to load dashboard data', 'error');
+        addAlert('Failed to load dashboard data', 'error');
       }
     };
 
     fetchDashboardData();
-  }, [getRecentScans, showAlert]);
+  }, [getRecentScans, addAlert]);
 
   return (
-    <Container className={classes.root} maxWidth="xl">
-      <div className={classes.headerContainer}>
+    <StyledContainer maxWidth="xl">
+      <HeaderContainer>
         <Typography variant="h4">Welcome, {user?.firstName || 'User'}</Typography>
         <div>
           <Button variant="contained" color="secondary" onClick={toggleThemeMode}>
             {mode === 'light' ? 'Dark Mode' : 'Light Mode'}
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            component={RouterLink}
-            to="/scans/new"
-            className={classes.newScanButton}
-          >
+          <NewScanButton variant="contained" color="primary" component={RouterLink} to="/scans/new">
             New Scan
-          </Button>
+          </NewScanButton>
         </div>
-      </div>
+      </HeaderContainer>
 
       <Grid container spacing={3}>
         {/* Security Score */}
         <Grid item xs={12} md={4}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <SecurityScoreCard score={securityScore} loading={loading} />
-          </Paper>
+          </StyledPaper>
         </Grid>
 
         {/* Alerts Widget */}
         <Grid item xs={12} md={8}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <AlertsWidget />
-          </Paper>
+          </StyledPaper>
         </Grid>
 
         {/* Vulnerability Chart */}
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <VulnerabilityChart scans={recentScans} />
-          </Paper>
+          </StyledPaper>
         </Grid>
 
         {/* Scan History */}
         <Grid item xs={12} md={6}>
-          <Paper className={classes.paper}>
+          <StyledPaper>
             <ScanHistoryTable scans={recentScans} loading={loading} />
-          </Paper>
+          </StyledPaper>
         </Grid>
       </Grid>
-    </Container>
+    </StyledContainer>
   );
 };
 

@@ -1,40 +1,47 @@
-import React, { useState } from 'react';
-import { Container, Typography, Button, Paper, Grid, TextField } from '@mui/material';
+import { useState } from 'react';
+import { Container, Typography, Button, Paper, Grid, TextField, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/material/styles';
 import { useDispatch } from 'react-redux';
 import { resetPassword } from '../../store/actions/authActions';
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-    padding: theme.spacing(4),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 400,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  info: {
-    textAlign: 'center',
-    marginBottom: theme.spacing(2),
-  },
+// Using styled API instead of makeStyles
+const StyledContainer = styled(Container)(({ theme }) => ({
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  width: '100%',
+  maxWidth: 400,
+}));
+
+const StyledForm = styled('form')(({ theme }) => ({
+  width: '100%', // Fix IE 11 issue.
+  marginTop: theme.spacing(1),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(3, 0, 2),
+}));
+
+const InfoText = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  marginBottom: theme.spacing(2),
+}));
+
+const FormDiv = styled('div')(({ theme }) => ({
+  width: '100%',
+  marginTop: theme.spacing(1),
 }));
 
 const ResetPassword = () => {
-  const classes = useStyles();
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,7 +65,7 @@ const ResetPassword = () => {
     switch (resetStep) {
       case 'request':
         return (
-          <form className={classes.form} onSubmit={handleResetPassword}>
+          <StyledForm onSubmit={handleResetPassword}>
             <TextField
               variant="outlined"
               margin="normal"
@@ -72,62 +79,57 @@ const ResetPassword = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
-            <Button
+            <SubmitButton
               type="submit"
               fullWidth
               variant="contained"
               color="primary"
-              className={classes.submit}
               disabled={loading}
             >
               {loading ? 'Sending Instructions...' : 'Reset Password'}
-            </Button>
+            </SubmitButton>
             <Grid container>
               <Grid item xs>
-                <RouterLink to="/auth/login" style={{ textDecoration: 'none', color: 'primary' }}>
+                <Link component={RouterLink} to="/auth/login" color="primary">
                   Back to Login
-                </RouterLink>
+                </Link>
               </Grid>
               <Grid item>
-                <RouterLink
-                  to="/auth/register"
-                  style={{ textDecoration: 'none', color: 'primary' }}
-                >
+                <Link component={RouterLink} to="/auth/register" color="primary">
                   Create new account
-                </RouterLink>
+                </Link>
               </Grid>
             </Grid>
-          </form>
+          </StyledForm>
         );
 
       case 'instructions':
         return (
-          <div className={classes.form}>
-            <Typography variant="h6" color="primary" className={classes.info}>
+          <FormDiv>
+            <InfoText variant="h6" color="primary">
               Password Reset Instructions Sent
-            </Typography>
-            <Typography variant="body1" paragraph className={classes.info}>
+            </InfoText>
+            <InfoText variant="body1" paragraph>
               We've sent password reset instructions to {email}. Please check your email inbox (and
               spam folder) for further steps to reset your password.
-            </Typography>
-            <Button
+            </InfoText>
+            <SubmitButton
               fullWidth
               variant="contained"
               color="primary"
-              className={classes.submit}
               onClick={() => setResetStep('request')}
               disabled={loading}
             >
               Resend Instructions
-            </Button>
-            <Grid container justifyContent="center" style={{ marginTop: 16 }}>
+            </SubmitButton>
+            <Grid container justifyContent="center" sx={{ marginTop: 2 }}>
               <Grid item>
-                <RouterLink to="/auth/login" style={{ textDecoration: 'none', color: 'primary' }}>
+                <Link component={RouterLink} to="/auth/login" color="primary">
                   Return to Login
-                </RouterLink>
+                </Link>
               </Grid>
             </Grid>
-          </div>
+          </FormDiv>
         );
 
       default:
@@ -136,14 +138,14 @@ const ResetPassword = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs" className={classes.root}>
-      <Paper elevation={6} className={classes.paper}>
+    <StyledContainer component="main" maxWidth="xs">
+      <StyledPaper elevation={6}>
         <Typography component="h1" variant="h5">
           Reset Password
         </Typography>
         {renderResetContent()}
-      </Paper>
-    </Container>
+      </StyledPaper>
+    </StyledContainer>
   );
 };
 
