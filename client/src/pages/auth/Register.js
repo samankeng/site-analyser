@@ -9,7 +9,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { Grid } from '@mui/system/Grid';
+import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
