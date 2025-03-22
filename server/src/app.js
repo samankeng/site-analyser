@@ -15,33 +15,46 @@ const config = require('./config');
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect(config.database.uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(config.database.uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors({
-  origin: config.cors.allowedOrigins,
-  methods: config.cors.methods,
-  allowedHeaders: config.cors.allowedHeaders,
-  credentials: true,
-}));
+// app.use(cors({
+//   origin: config.cors.allowedOrigins,
+//   methods: config.cors.methods,
+//   allowedHeaders: config.cors.allowedHeaders,
+//   credentials: true,
+// }));
+
+app.use(
+  cors({
+    origin: ['http://localhost', 'http://localhost:3000', 'http://client'],
+    methods: config.cors.methods,
+    allowedHeaders: config.cors.allowedHeaders,
+    credentials: true,
+  })
+);
+
 app.use(morgan('combined')); // Logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Rate limiting
-app.use(createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-}));
+app.use(
+  createRateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -58,10 +71,10 @@ if (config.env !== 'production') {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
+  res.status(200).json({
     status: 'UP',
     timestamp: new Date().toISOString(),
-    version: config.version
+    version: config.version,
   });
 });
 
@@ -70,7 +83,7 @@ app.get('/', (req, res) => {
   res.status(200).json({
     name: 'Site-Analyser API',
     version: config.version,
-    documentation: `${config.baseUrl}/api-docs`
+    documentation: `${config.baseUrl}/api-docs`,
   });
 });
 
@@ -78,7 +91,7 @@ app.get('/', (req, res) => {
 app.use((req, res, next) => {
   res.status(404).json({
     error: 'Not Found',
-    message: `The requested resource '${req.originalUrl}' was not found on this server`
+    message: `The requested resource '${req.originalUrl}' was not found on this server`,
   });
 });
 
@@ -93,7 +106,7 @@ app.listen(PORT, () => {
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('Uncaught Exception:', error);
   // Perform graceful shutdown or recovery actions
   process.exit(1);

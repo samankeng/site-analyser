@@ -76,8 +76,8 @@ services:
       - LOG_LEVEL=INFO
       - API_KEY=${AI_SERVICE_API_KEY}
       # Fix the CORS_ORIGINS format
-      #- CORS_ORIGINS=http://localhost,http://localhost:3000,http://client
-      - CORS_ORIGINS=["*"]
+      - CORS_ORIGINS=http://localhost,http://localhost:3000,http://client
+      # - CORS_ORIGINS=["*"]
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SHODAN_API_KEY=${SHODAN_API_KEY}
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}

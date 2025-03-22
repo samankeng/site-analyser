@@ -105,14 +105,10 @@ const Login = () => {
           </SubmitButton>
           <Grid container>
             <Grid item xs>
-              <Link component={RouterLink} to="/auth/reset-password" variant="body2">
-                Forgot password?
-              </Link>
+              <Link onClick={() => navigate('/reset-password')}>Forgot password?</Link>
             </Grid>
             <Grid item>
-              <Link component={RouterLink} to="/auth/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+              <Link onClick={() => navigate('/register')}>{"Don't have an account? Sign Up"}</Link>
             </Grid>
           </Grid>
         </StyledForm>

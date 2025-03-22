@@ -6,10 +6,10 @@ import {
   Button,
   Paper,
   Link,
+  Grid,
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
@@ -46,7 +46,7 @@ const SubmitButton = styled(Button)(({ theme }) => ({
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { addAlert } = useAlert(); // Updated from showAlert to addAlert
+  const { addAlert } = useAlert();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -58,6 +58,11 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [passwordInfo, setPasswordInfo] = useState({
+    isValid: false,
+    helperText: '',
+    color: 'error',
+  });
   const [loading, setLoading] = useState(false);
 
   const handleChange = e => {
@@ -66,6 +71,16 @@ const Register = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    // Update password validation in real-time
+    if (name === 'password') {
+      const validation = validatePassword(value);
+      setPasswordInfo({
+        isValid: validation.isValid,
+        helperText: validation.helperText,
+        color: validation.color,
+      });
+    }
   };
 
   const validateForm = () => {
@@ -83,25 +98,10 @@ const Register = () => {
       newErrors.email = 'Invalid email address';
     }
 
+    // Password validation is now separated out
     const passwordValidation = validatePassword(formData.password);
-    // Fix: Handle the case where passwordValidation is an object
-    if (passwordValidation !== true) {
-      // If it's an object with helperText, use that
-      if (typeof passwordValidation === 'object' && passwordValidation.helperText) {
-        newErrors.password = passwordValidation.helperText;
-      }
-      // Otherwise if it's an object with errors
-      else if (typeof passwordValidation === 'object' && passwordValidation.errors) {
-        newErrors.password = passwordValidation.errors.join(', ');
-      }
-      // If it's a simple string message
-      else if (typeof passwordValidation === 'string') {
-        newErrors.password = passwordValidation;
-      }
-      // Default fallback
-      else {
-        newErrors.password = 'Invalid password';
-      }
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.errors[0] || 'Invalid password';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -140,6 +140,7 @@ const Register = () => {
         addAlert('Registration failed', 'error');
       }
     } catch (error) {
+      console.error('Registration error:', error);
       addAlert('Registration error', 'error');
     } finally {
       setLoading(false);
@@ -212,8 +213,9 @@ const Register = () => {
                 autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
-                error={!!errors.password}
-                helperText={errors.password}
+                error={!!errors.password || (passwordInfo.color === 'error' && formData.password)}
+                color={passwordInfo.color !== 'error' ? passwordInfo.color : undefined}
+                helperText={errors.password || (formData.password ? passwordInfo.helperText : '')}
               />
             </Grid>
             <Grid item xs={12}>
