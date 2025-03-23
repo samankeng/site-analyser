@@ -5,7 +5,8 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://server:3000/api}
+        # Change this to use the host's IP directly
+        - REACT_APP_API_URL=http://localhost:3000/api
     ports:
       - "80:80"
     networks:
@@ -36,17 +37,26 @@ services:
         limits:
           memory: 1GB
     volumes:
+      # Make sure app.js is properly mounted
+      - ./server/src:/app/src
+
       # Map a local index.js file to the container
-      - ./server/index.js:/app/index.js
+      #- ./server/index.js:/app/index.js
+
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development # Change to development for troubleshooting
       - PORT=3000
-      - MONGODB_URI=mongodb://mongodb:27017/site-analyser
+      # - MONGODB_URI=mongodb://mongodb:27017/site-analyser
+      - MONGODB_URI=mongodb://admin:secure_password@172.18.0.4:27017/site-analyser?authSource=admin&directConnection=true
+      - MONGO_URI=mongodb://admin:secure_password@172.18.0.4:27017/site-analyser?authSource=admin&directConnection=true
       - REDIS_URL=redis://redis:6379
       - AI_SERVICE_URL=http://ai-service:8000/api
       - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}
       - SHODAN_API_KEY=${SHODAN_API_KEY}
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+      # Add CORS environment variables
+      - CORS_ENABLED=true
+      - CORS_ORIGINS=http://localhost,http://localhost:80,http://client
     depends_on:
       - mongodb
       - redis
@@ -122,9 +132,9 @@ services:
       resources:
         limits:
           memory: 1GB
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+    #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
 
   # Redis cache
   redis:

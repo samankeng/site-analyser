@@ -28,10 +28,13 @@ import { useDispatch } from 'react-redux';
 export const initiateScan = createAsyncThunk(
   'scans/initiate',
   async (scanData, { dispatch, rejectWithValue }) => {
+    console.log('initiateScan action called with data:', scanData);
     try {
       dispatch({ type: SCAN_REQUEST });
+      console.log('About to make API call to /scans');
 
       const res = await api.post('/scans', scanData);
+      console.log('API response:', res);
       const scanResult = res.data.data;
 
       dispatch({
@@ -43,6 +46,7 @@ export const initiateScan = createAsyncThunk(
 
       return scanResult;
     } catch (err) {
+      console.error('Error in initiateScan:', err);
       const errorMessage = err.response?.data?.message || 'Failed to initiate scan';
 
       dispatch({

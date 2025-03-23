@@ -17,7 +17,15 @@ router.get('/summary', controller.getAlertSummary);
 
 // Routes for specific alerts
 router.get('/:alertId', validateRequest(validation.validateAlertId), controller.getAlertById);
-router.put('/:alertId/status', validateRequest(validation.updateAlertStatus), controller.updateAlertStatus);
+router.put(
+  '/:alertId/status',
+  validateRequest(validation.updateAlertStatus),
+  controller.updateAlertStatus
+);
 router.delete('/:alertId', validateRequest(validation.validateAlertId), controller.deleteAlert);
+
+// In server/src/api/auth/routes.js, add this line:
+console.log('Auth routes loaded');
+
 
 module.exports = router;

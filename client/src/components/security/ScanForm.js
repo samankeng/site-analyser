@@ -22,7 +22,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import SecurityIcon from '@mui/icons-material/Security';
 import { isValidUrl } from '../../utils/validators';
 import ScanOptions from './ScanOptions';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useScanActions } from '../../store/actions/scanActions';
 
 // Using styled API instead of makeStyles
 const Root = styled('div')({
@@ -103,13 +104,23 @@ const SubmitButton = styled(Button)(({ theme }) => ({
  *
  * @param {Object} props - Component props
  * @param {Function} props.onSubmit - Function called when form is submitted
+ * @param {Function} props.onScanComplete - Alternative name for onSubmit (for backwards compatibility)
  * @param {boolean} props.isLoading - Whether a scan is in progress
  * @param {Object} props.initialValues - Initial form values
+ * @param {Object} props.rest - Any other props to pass to the Root component
  */
-const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
+const ScanForm = ({ onSubmit, onScanComplete, isLoading = false, initialValues = {}, ...rest }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Get the scan actions from Redux
+  const { startScan } = useScanActions();
+
+  // Local loading state (use prop or internal state)
+  const [localLoading, setLocalLoading] = useState(false);
+  const effectiveLoading = isLoading || localLoading;
 
   // Default scan options
   const defaultOptions = {
@@ -215,8 +226,10 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
   // Handle form submission
   const handleSubmit = e => {
     e.preventDefault();
+    console.log('Form submitted');
 
     if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
 
@@ -226,9 +239,43 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
       scanDepth,
       options,
     };
+    console.log('Scan data prepared:', formData);
 
-    // Call parent's onSubmit
-    onSubmit(formData);
+    // First, call any parent-provided handlers (for backward compatibility)
+    if (typeof onSubmit === 'function') {
+      onSubmit(formData);
+    } else if (typeof onScanComplete === 'function') {
+      onScanComplete(formData);
+    }
+
+    // Then, handle the API call directly if no parent handlers were provided
+    // or if we're on the HomePage (which doesn't handle API calls)
+    if (!onSubmit && !onScanComplete) {
+      console.log('No parent handlers provided, making API call directly');
+      setLocalLoading(true);
+
+      // Use the Redux action to start the scan
+      startScan(formData)
+        .then(result => {
+          console.log('Scan started successfully:', result);
+
+          // Navigate to the appropriate page based on the result
+          if (result && result.id) {
+            navigate(`/scans/${result.id}`);
+          } else if (result && result.scanId) {
+            navigate(`/scans/${result.scanId}`);
+          } else {
+            // If no ID is found, go to dashboard
+            navigate('/dashboard');
+          }
+        })
+        .catch(error => {
+          console.error('Error starting scan:', error);
+        })
+        .finally(() => {
+          setLocalLoading(false);
+        });
+    }
   };
 
   // Set example URL
@@ -241,7 +288,7 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
   const exampleUrls = ['https://example.com', 'https://google.com', 'https://github.com'];
 
   return (
-    <Root>
+    <Root {...rest}>
       <FormContainer onSubmit={handleSubmit}>
         <StyledPaper elevation={1}>
           <SectionTitle>
@@ -258,7 +305,7 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
             placeholder="https://example.com"
             error={!!urlError}
             helperText={urlError}
-            disabled={isLoading}
+            disabled={effectiveLoading}
             required
           />
 
@@ -272,7 +319,7 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
                 size="small"
                 variant="outlined"
                 onClick={() => setExampleUrl(example)}
-                disabled={isLoading}
+                disabled={effectiveLoading}
               >
                 {example}
               </ExampleButton>
@@ -304,7 +351,7 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
               max={3}
               valueLabelDisplay="auto"
               valueLabelFormat={getScanDepthLabel}
-              disabled={isLoading}
+              disabled={effectiveLoading}
             />
 
             <ScanDepthMarker>
@@ -319,7 +366,11 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
 
           <StyledDivider />
 
-          <ScanOptions options={options} onChange={handleOptionsChange} disabled={isLoading} />
+          <ScanOptions
+            options={options}
+            onChange={handleOptionsChange}
+            disabled={effectiveLoading}
+          />
         </StyledPaper>
 
         <SubmitButton
@@ -328,10 +379,12 @@ const ScanForm = ({ onSubmit, isLoading = false, initialValues = {} }) => {
           color="primary"
           size="large"
           fullWidth
-          disabled={isLoading || !url}
-          startIcon={isLoading ? <CircularProgress size={24} color="inherit" /> : <SecurityIcon />}
+          disabled={effectiveLoading || !url}
+          startIcon={
+            effectiveLoading ? <CircularProgress size={24} color="inherit" /> : <SecurityIcon />
+          }
         >
-          {isLoading ? 'Scanning...' : 'Start Security Scan'}
+          {effectiveLoading ? 'Scanning...' : 'Start Security Scan'}
         </SubmitButton>
       </FormContainer>
     </Root>

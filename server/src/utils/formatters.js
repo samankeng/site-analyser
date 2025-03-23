@@ -24,7 +24,7 @@ const formatters = {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
     });
   },
 
@@ -56,7 +56,7 @@ const formatters = {
     if (typeof input !== 'string') return input;
 
     const { visibleStart = 2, visibleEnd = 2 } = options;
-    
+
     if (input.length <= visibleStart + visibleEnd) return input;
 
     const start = input.slice(0, visibleStart);
@@ -93,10 +93,10 @@ const formatters = {
   camelCaseToTitleCase(str) {
     if (typeof str !== 'string') return str;
 
-    return str
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, function(str){ return str.toUpperCase(); });
-  }
+    return str.replace(/([A-Z])/g, ' $1').replace(/^./, function (str) {
+      return str.toUpperCase();
+    });
+  },
 };
 
-export default formatters;
+module.exports = formatters;

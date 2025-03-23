@@ -7,6 +7,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Add withCredentials to properly handle CORS with credentials
+  withCredentials: true,
   // Add timeout to prevent infinite loading states
   timeout: 30000, // 30 seconds
 });
@@ -21,10 +23,17 @@ api.interceptors.request.use(
     }
 
     // Add timestamp to prevent caching issues (optional)
-    config.params = {
-      ...config.params,
-      _t: Date.now(),
-    };
+    // In api.js, modify the request interceptor
+    if (config.method.toLowerCase() === 'get') {
+      // Only add timestamp to GET requests to prevent caching
+      config.params = {
+        ...config.params,
+        _t: Date.now(),
+      };
+    }
+
+    // Log outgoing requests for debugging
+    console.log(`API Request: ${config.method.toUpperCase()} ${config.url}`, config);
 
     return config;
   },
@@ -37,14 +46,31 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   response => {
+    // Log successful responses for debugging
+    console.log(`API Response: ${response.status} ${response.config.url}`, response.data);
     return response;
   },
   error => {
     const originalRequest = error.config;
 
+    // Add detailed logging for debugging
+    console.error('API Error:', {
+      url: originalRequest?.url,
+      method: originalRequest?.method,
+      status: error.response?.status,
+      data: error.response?.data,
+      error: error.message,
+    });
+
     // Handle no response from server (network errors)
     if (!error.response) {
       console.error('Network error: No response from server');
+
+      // Check for CORS errors specifically
+      if (error.message.includes('Network Error')) {
+        console.warn('This may be a CORS issue. Check server CORS configuration.');
+      }
+
       // Could dispatch to a global error state in your app
       return Promise.reject(new Error('Network error: Unable to connect to server'));
     }
@@ -87,6 +113,18 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Create a test function to verify API connectivity
+api.testConnection = async () => {
+  try {
+    const response = await api.get('/health');
+    console.log('API connection test successful:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error('API connection test failed:', error);
+    return { success: false, error: error.message };
+  }
+};
 
 // Helper methods for common API calls
 api.fetchWithCachedReturn = async (url, cacheTime = 5 * 60 * 1000) => {

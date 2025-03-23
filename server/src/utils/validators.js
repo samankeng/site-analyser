@@ -1,4 +1,4 @@
-import validator from 'validator';
+const validator = require('validator');
 
 /**
  * Utility functions for input validation
@@ -22,7 +22,7 @@ const validators = {
    */
   isValidURL(url, options = {}) {
     if (typeof url !== 'string') return false;
-    
+
     const defaultOptions = {
       protocols: ['http', 'https', 'ftp'],
       require_tld: true,
@@ -31,7 +31,7 @@ const validators = {
       require_valid_protocol: true,
       allow_underscores: false,
       allow_trailing_dot: false,
-      allow_protocol_relative_urls: false
+      allow_protocol_relative_urls: false,
     };
 
     return validator.isURL(url.trim(), { ...defaultOptions, ...options });
@@ -45,7 +45,7 @@ const validators = {
    */
   isStrongPassword(password, options = {}) {
     if (typeof password !== 'string') return false;
-    
+
     const defaultOptions = {
       minLength: 8,
       minLowercase: 1,
@@ -58,7 +58,7 @@ const validators = {
       pointsForContainingLower: 10,
       pointsForContainingUpper: 10,
       pointsForContainingNumber: 10,
-      pointsForContainingSymbol: 10
+      pointsForContainingSymbol: 10,
     };
 
     return validator.isStrongPassword(password, { ...defaultOptions, ...options });
@@ -72,11 +72,11 @@ const validators = {
    */
   isValidIP(ip, version) {
     if (typeof ip !== 'string') return false;
-    
+
     if (version) {
       return validator.isIP(ip.trim(), version);
     }
-    
+
     return validator.isIP(ip.trim());
   },
 
@@ -87,16 +87,16 @@ const validators = {
    */
   sanitizeInput(input) {
     if (typeof input !== 'string') return input;
-    
+
     // Trim whitespace
     let sanitized = input.trim();
-    
+
     // Escape HTML
     sanitized = validator.escape(sanitized);
-    
+
     // Remove any potential script tags or other potential XSS vectors
     sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    
+
     return sanitized;
   },
 
@@ -107,19 +107,19 @@ const validators = {
    */
   isNotEmpty(input) {
     if (input === undefined || input === null) return false;
-    
+
     if (typeof input === 'string') {
       return input.trim().length > 0;
     }
-    
+
     if (Array.isArray(input)) {
       return input.length > 0;
     }
-    
+
     if (typeof input === 'object') {
       return Object.keys(input).length > 0;
     }
-    
+
     return true;
   },
 
@@ -130,7 +130,7 @@ const validators = {
    */
   isValidMongoId(id) {
     if (typeof id !== 'string') return false;
-    
+
     // MongoDB ObjectId is a 24-character hex string
     const objectIdRegex = /^[0-9A-Fa-f]{24}$/;
     return objectIdRegex.test(id);
@@ -144,7 +144,7 @@ const validators = {
    */
   isValidPhoneNumber(phoneNumber, locale = 'any') {
     if (typeof phoneNumber !== 'string') return false;
-    
+
     // Remove any non-digit characters
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     return validator.isMobilePhone(cleaned, locale);
@@ -157,7 +157,7 @@ const validators = {
    */
   isValidCreditCard(cardNumber) {
     if (typeof cardNumber !== 'string') return false;
-    
+
     // Remove any spaces or dashes
     const cleaned = cardNumber.replace(/[\s-]/g, '');
     return validator.isCreditCard(cleaned);
@@ -170,7 +170,7 @@ const validators = {
    */
   isValidJSON(jsonString) {
     if (typeof jsonString !== 'string') return false;
-    
+
     try {
       JSON.parse(jsonString);
       return true;
@@ -188,15 +188,15 @@ const validators = {
    */
   isAlphanumeric(input, options = {}) {
     if (typeof input !== 'string') return false;
-    
+
     const { allowSpaces = false } = options;
-    
+
     if (allowSpaces) {
       return /^[a-zA-Z0-9\s]+$/.test(input);
     }
-    
+
     return validator.isAlphanumeric(input);
-  }
+  },
 };
 
-export default validators;
+module.exports = validators;

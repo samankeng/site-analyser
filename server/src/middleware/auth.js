@@ -11,11 +11,13 @@ const config = require('../config');
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
+  if (req.originalUrl.includes('/api/auth/register')) {
+    console.log('Skipping auth check for registration');
+    return next();
+  }
+
   // Get token from Authorization header or cookie
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     // Extract token from Bearer token in header
     token = req.headers.authorization.split(' ')[1];
   } else if (req.cookies && req.cookies.token) {
@@ -61,7 +63,12 @@ const protect = asyncHandler(async (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(new ApiError(500, 'User not found in request. Protect middleware must be used before authorize.'));
+      return next(
+        new ApiError(
+          500,
+          'User not found in request. Protect middleware must be used before authorize.'
+        )
+      );
     }
 
     if (!roles.includes(req.user.role)) {

@@ -125,8 +125,7 @@ const Register = () => {
 
     try {
       const userData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
       };

@@ -84,9 +84,19 @@ export const register = userData => async dispatch => {
 
     return response.user;
   } catch (err) {
+    console.error('Full error object:', JSON.stringify(err, null, 2));
     // Handle validation errors if they exist
     if (err.validationErrors) {
-      err.validationErrors.forEach(error => dispatch(setErrorAlert(error.msg)));
+      // If it's an array, use it directly
+      if (Array.isArray(err.validationErrors)) {
+        err.validationErrors.forEach(error => dispatch(setErrorAlert(error.msg)));
+      }
+      // If it's an object, convert it to array first
+      else {
+        Object.keys(err.validationErrors).forEach(key => {
+          dispatch(setErrorAlert(err.validationErrors[key]));
+        });
+      }
     } else {
       dispatch(setErrorAlert(err.message || 'Registration failed'));
     }

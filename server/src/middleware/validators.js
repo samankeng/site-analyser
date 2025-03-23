@@ -7,7 +7,7 @@ const ApiError = require('../utils/ApiError');
  * @param {Array} validations - Array of express-validator validation chains
  * @returns {Function} Express middleware function
  */
-const validateRequest = (validations) => {
+const validateRequest = validations => {
   return async (req, res, next) => {
     // Run all validations
     for (let validation of validations) {
@@ -17,7 +17,7 @@ const validateRequest = (validations) => {
 
     // Get validation errors
     const errors = validationResult(req);
-    
+
     if (errors.isEmpty()) {
       return next();
     }
@@ -34,7 +34,7 @@ const validateRequest = (validations) => {
     // Return error response
     const error = new ApiError(400, 'Validation Error');
     error.errors = extractedErrors;
-    
+
     return next(error);
   };
 };
@@ -50,30 +50,30 @@ const sanitizeRequest = (req, res, next) => {
   if (req.body) {
     // Convert keys that start with $ to safe alternatives
     // This prevents NoSQL injection
-    const sanitize = (obj) => {
+    const sanitize = obj => {
       const result = {};
-      
+
       Object.keys(obj).forEach(key => {
         // Replace MongoDB operators with safe alternatives
         const safeKey = key.replace(/^\$/, '_$');
-        
+
         if (typeof obj[key] === 'object' && obj[key] !== null) {
           result[safeKey] = sanitize(obj[key]);
         } else {
           result[safeKey] = obj[key];
         }
       });
-      
+
       return result;
     };
-    
+
     req.body = sanitize(req.body);
   }
-  
+
   next();
 };
 
 module.exports = {
   validateRequest,
-  sanitizeRequest
+  sanitizeRequest,
 };

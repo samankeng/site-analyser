@@ -56,15 +56,17 @@ const authService = {
     } catch (error) {
       console.error('Registration error:', error.response?.data || error.message);
 
-      // Get validation errors if they exist
+      // Get validation errors from the proper location in the response
       const validationErrors = error.response?.data?.errors;
       const errorMessage =
+        error.response?.data?.error ||
         error.response?.data?.message ||
         error.response?.data?.error ||
         'Registration failed. Please try again.';
 
+      // Create enhanced error with properly structured validation errors
       const enhancedError = new Error(errorMessage);
-      enhancedError.originalError = error;
+      enhancedError.data = error.response?.data; // Include the full error data
       enhancedError.validationErrors = validationErrors;
       throw enhancedError;
     }

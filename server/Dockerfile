@@ -37,15 +37,15 @@ RUN apk add --no-cache python3 make g++ curl
 # Copy package files and create a basic index.js
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
-RUN echo 'const express = require("express"); \
-const app = express(); \
-const port = process.env.PORT || 3000; \
-app.get("/", (req, res) => { \
-  res.json({ message: "Server is running" }); \
-}); \
-app.listen(port, () => { \
-  console.log(`Server running on port ${port}`); \
-});' > index.js
+# RUN echo 'const express = require("express"); \
+# const app = express(); \
+# const port = process.env.PORT || 3000; \
+# app.get("/", (req, res) => { \
+#   res.json({ message: "Server is running" }); \
+# }); \
+# app.listen(port, () => { \
+#   console.log(`Server running on port ${port}`); \
+# });' > index.js
 
 # Copy the rest of the code
 COPY . .
@@ -54,4 +54,4 @@ COPY . .
 EXPOSE 3000
 
 # Command to run the application
-CMD ["node", "index.js"]
+CMD echo "MongoDB URI: $MONGODB_URI" && node src/app.js

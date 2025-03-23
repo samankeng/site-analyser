@@ -1,6 +1,6 @@
 import os
 from typing import List, Optional, Dict, Any
-from pydantic import BaseSettings, root_validator, AnyHttpUrl
+from pydantic import BaseSettings, Field, validator
 
 class Settings(BaseSettings):
     # Application settings
@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", "8000"))
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
-    # CORS settings
-    CORS_ORIGINS: List[str] = os.getenv("CORS_ORIGINS", "*").split(",")
+    # CORS settings - defined as empty list first, will be populated in __init__
+    CORS_ORIGINS: List[str] = []
     
     # Security settings
     API_KEY: Optional[str] = os.getenv("API_KEY")
@@ -33,16 +33,23 @@ class Settings(BaseSettings):
     OLLAMA_ENDPOINT: str = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/generate")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama2")
     
-    @root_validator
-    def validate_cors_origins(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if values.get("CORS_ORIGINS") == ["*"]:
-            values["CORS_ORIGINS"] = ["*"]
-        return values
+    def __init__(self, **data: Any):
+        # Process ALLOWED_ORIGINS before initializing
+        cors_input = os.getenv("ALLOWED_ORIGINS", "*")
+        
+        if cors_input == "*":
+            data["CORS_ORIGINS"] = ["*"]
+        else:
+            data["CORS_ORIGINS"] = [origin.strip() for origin in cors_input.split(",") if origin.strip()]
+        
+        super().__init__(**data)
     
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
+        # Important: disable JSON parsing for env vars
+        json_loads = lambda v: v  # This ensures env vars aren't parsed as JSON
 
 # Create settings instance
 settings = Settings()

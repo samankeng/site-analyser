@@ -72,8 +72,25 @@ const HomePage = () => {
   ];
 
   const handleScanComplete = scanResult => {
+    console.log('Scan completed with result:', scanResult);
     // Navigate to scan results page
-    navigate(`/scans/${scanResult.id}`);
+    //navigate(`/scans/${scanResult.id}`);
+
+    // Check if scanResult has the expected structure
+    if (scanResult && scanResult.id) {
+      // Navigate to scan results page
+      navigate(`/scans/${scanResult.id}`);
+    } else if (scanResult && scanResult.scanId) {
+      // Alternative property name that might be used
+      navigate(`/scans/${scanResult.scanId}`);
+    } else {
+      // If no ID is available, navigate to a default location
+      console.warn('No scan ID found in result:', scanResult);
+      navigate('/dashboard');
+
+      // Optionally show an alert/notification to the user
+      // if you have an alert system set up
+    }
   };
 
   return (

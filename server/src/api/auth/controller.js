@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const User = require('../../models/User');
+const mongoose = require('mongoose');
 const ApiError = require('../../utils/ApiError');
 const { asyncHandler } = require('../../middleware/asyncHandler');
 const { generateMfaSecret, verifyMfaToken } = require('../../services/mfaService');
@@ -18,48 +19,56 @@ class AuthController {
    */
   register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
+    console.log('Registration request body:', req.body);
+    try {
+      console.log('Checking MongoDB connection state:', mongoose.connection.readyState);
+      console.log('Checking if user exists with email:', email);
+      // Check if user already exists
+      const existingUser = await User.findOne({ email }).maxTimeMS(5000);
+      console.log('User exists check completed:', existingUser ? 'Found user' : 'No user found');
+      if (existingUser) {
+        throw new ApiError(400, 'User with this email already exists');
+      }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new ApiError(400, 'User with this email already exists');
-    }
+      // Generate email verification token if email verification is enabled
+      let verificationToken = null;
+      const emailVerified = !config.features.emailVerification;
 
-    // Generate email verification token if email verification is enabled
-    let verificationToken = null;
-    const emailVerified = !config.features.emailVerification;
-
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password,
-      emailVerified
-    });
-
-    // Generate verification token if needed
-    if (!emailVerified) {
-      verificationToken = user.generateEmailVerificationToken();
-      await user.save();
-
-      // Send verification email
-      await sendEmail({
-        to: user.email,
-        subject: 'Verify your email address',
-        template: 'emailVerification',
-        data: {
-          name: user.name,
-          verificationUrl: `${config.baseUrl}/verify-email?token=${verificationToken}`
-        }
+      // Create user
+      const user = await User.create({
+        name,
+        email,
+        password,
+        emailVerified,
       });
-    }
 
-    // Send token response
-    this.sendTokenResponse(user, 201, res, {
-      message: emailVerified 
-        ? 'User registered successfully'
-        : 'User registered. Please verify your email address'
-    });
+      // Generate verification token if needed
+      if (!emailVerified) {
+        verificationToken = user.generateEmailVerificationToken();
+        await user.save();
+
+        // Send verification email
+        await sendEmail({
+          to: user.email,
+          subject: 'Verify your email address',
+          template: 'emailVerification',
+          data: {
+            name: user.name,
+            verificationUrl: `${config.baseUrl}/verify-email?token=${verificationToken}`,
+          },
+        });
+      }
+
+      // Send token response
+      this.sendTokenResponse(user, 201, res, {
+        message: emailVerified
+          ? 'User registered successfully'
+          : 'User registered. Please verify your email address',
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   });
 
   /**
@@ -107,8 +116,8 @@ class AuthController {
           user: {
             id: user._id,
             name: user.name,
-            email: user.email
-          }
+            email: user.email,
+          },
         });
       }
 
@@ -138,7 +147,7 @@ class AuthController {
 
     res.status(200).json({
       success: true,
-      data: user
+      data: user,
     });
   });
 
@@ -150,7 +159,7 @@ class AuthController {
   logout = asyncHandler(async (req, res) => {
     res.status(200).json({
       success: true,
-      message: 'Successfully logged out'
+      message: 'Successfully logged out',
     });
   });
 
@@ -164,7 +173,7 @@ class AuthController {
     const fieldsToUpdate = {};
 
     if (name) fieldsToUpdate.name = name;
-    
+
     // If email is being updated, check if it's already in use
     if (email && email !== req.user.email) {
       const existingUser = await User.findOne({ email });
@@ -172,16 +181,16 @@ class AuthController {
         throw new ApiError(400, 'Email is already in use');
       }
       fieldsToUpdate.email = email;
-      
+
       // If email verification is enabled, mark as unverified
       if (config.features.emailVerification) {
         fieldsToUpdate.emailVerified = false;
-        
+
         // Generate verification token
         const user = await User.findById(req.user.id);
         const verificationToken = user.generateEmailVerificationToken();
         fieldsToUpdate.emailVerificationToken = user.emailVerificationToken;
-        
+
         // Send verification email
         await sendEmail({
           to: email,
@@ -189,23 +198,24 @@ class AuthController {
           template: 'emailVerification',
           data: {
             name: user.name,
-            verificationUrl: `${config.baseUrl}/verify-email?token=${verificationToken}`
-          }
+            verificationUrl: `${config.baseUrl}/verify-email?token=${verificationToken}`,
+          },
         });
       }
     }
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
     res.status(200).json({
       success: true,
       data: user,
-      message: email && config.features.emailVerification && email !== req.user.email
-        ? 'Profile updated. Please verify your new email address'
-        : 'Profile updated successfully'
+      message:
+        email && config.features.emailVerification && email !== req.user.email
+          ? 'Profile updated. Please verify your new email address'
+          : 'Profile updated successfully',
     });
   });
 
@@ -232,7 +242,7 @@ class AuthController {
 
     // Send token response
     this.sendTokenResponse(user, 200, res, {
-      message: 'Password updated successfully'
+      message: 'Password updated successfully',
     });
   });
 
@@ -265,13 +275,13 @@ class AuthController {
         template: 'passwordReset',
         data: {
           name: user.name,
-          resetUrl
-        }
+          resetUrl,
+        },
       });
 
       res.status(200).json({
         success: true,
-        message: 'Password reset email sent'
+        message: 'Password reset email sent',
       });
     } catch (err) {
       // If email fails, clear the reset token
@@ -293,15 +303,12 @@ class AuthController {
     const { password } = req.body;
 
     // Get hashed token
-    const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // Find user with valid token
     const user = await User.findOne({
       passwordResetToken: resetPasswordToken,
-      passwordResetExpires: { $gt: Date.now() }
+      passwordResetExpires: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -316,7 +323,7 @@ class AuthController {
 
     // Send token response
     this.sendTokenResponse(user, 200, res, {
-      message: 'Password reset successful'
+      message: 'Password reset successful',
     });
   });
 
@@ -329,10 +336,7 @@ class AuthController {
     const { token } = req.params;
 
     // Get hashed token
-    const emailVerificationToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // Find user with matching token
     const user = await User.findOne({ emailVerificationToken });
@@ -348,7 +352,7 @@ class AuthController {
 
     res.status(200).json({
       success: true,
-      message: 'Email verified successfully'
+      message: 'Email verified successfully',
     });
   });
 
@@ -371,8 +375,8 @@ class AuthController {
         success: true,
         data: {
           secret,
-          qrCode
-        }
+          qrCode,
+        },
       });
     }
 
@@ -388,8 +392,8 @@ class AuthController {
       success: true,
       data: {
         secret: user.mfaSecret,
-        qrCode
-      }
+        qrCode,
+      },
     });
   });
 
@@ -416,7 +420,7 @@ class AuthController {
 
     res.status(200).json({
       success: true,
-      message: 'MFA enabled successfully'
+      message: 'MFA enabled successfully',
     });
   });
 
@@ -454,7 +458,7 @@ class AuthController {
 
     res.status(200).json({
       success: true,
-      message: 'MFA disabled successfully'
+      message: 'MFA disabled successfully',
     });
   });
 
@@ -476,7 +480,7 @@ class AuthController {
     res.status(200).json({
       success: true,
       data: user.preferences,
-      message: 'Preferences updated successfully'
+      message: 'Preferences updated successfully',
     });
   });
 
@@ -503,7 +507,7 @@ class AuthController {
 
     res.status(200).json({
       success: true,
-      message: 'Account deactivated successfully'
+      message: 'Account deactivated successfully',
     });
   });
 
@@ -517,11 +521,9 @@ class AuthController {
 
     // Set cookie options
     const options = {
-      expires: new Date(
-        Date.now() + parseInt(config.jwt.expiresIn) * 24 * 60 * 60 * 1000
-      ),
+      expires: new Date(Date.now() + parseInt(config.jwt.expiresIn) * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: config.env === 'production'
+      secure: config.env === 'production',
     };
 
     // Remove sensitive data
@@ -534,7 +536,7 @@ class AuthController {
       createdAt: user.createdAt,
       lastLogin: user.lastLogin,
       emailVerified: user.emailVerified,
-      preferences: user.preferences
+      preferences: user.preferences,
     };
 
     res
@@ -544,7 +546,7 @@ class AuthController {
         success: true,
         token,
         user: userData,
-        ...additional
+        ...additional,
       });
   };
 }

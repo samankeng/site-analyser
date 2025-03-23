@@ -1,6 +1,6 @@
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
-import path from 'path';
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
+const path = require('path');
 
 /**
  * Create a custom logger with multiple transports
@@ -18,14 +18,14 @@ class Logger {
         winston.format.printf(info => {
           const { timestamp, level, message, ...metadata } = info;
           let msg = `${timestamp} [${level}]: ${message} `;
-          
+
           if (Object.keys(metadata).length > 0) {
             msg += JSON.stringify(metadata);
           }
-          
+
           return msg;
         })
-      )
+      ),
     });
 
     const fileTransport = new DailyRotateFile({
@@ -34,21 +34,15 @@ class Logger {
       zippedArchive: true,
       maxSize: '20m',
       maxFiles: '14d',
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      )
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     });
 
     // Create logger
     this.logger = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',
       levels: winston.config.npm.levels,
-      transports: [
-        consoleTransport,
-        fileTransport
-      ],
-      exitOnError: false
+      transports: [consoleTransport, fileTransport],
+      exitOnError: false,
     });
   }
 
@@ -108,4 +102,4 @@ class Logger {
 }
 
 // Export a singleton logger instance
-export default new Logger();
+module.exports = new Logger();

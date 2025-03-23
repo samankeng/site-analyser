@@ -787,30 +787,29 @@
                         }
                       }
                     }
-                    },
-                    "findings": {
-                      "type": "object",
-                      "properties": {
-                        "critical": {
-                          "type": "integer",
-                          "example": 1
-                        },
-                        "high": {
-                          "type": "integer",
-                          "example": 2
-                        },
-                        "medium": {
-                          "type": "integer",
-                          "example": 3
-                        },
-                        "low": {
-                          "type": "integer",
-                          "example": 5
-                        },
-                        "info": {
-                          "type": "integer",
-                          "example": 10
-                        }
+                  },
+                  "findings": {
+                    "type": "object",
+                    "properties": {
+                      "critical": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "high": {
+                        "type": "integer",
+                        "example": 2
+                      },
+                      "medium": {
+                        "type": "integer",
+                        "example": 3
+                      },
+                      "low": {
+                        "type": "integer",
+                        "example": 5
+                      },
+                      "info": {
+                        "type": "integer",
+                        "example": 10
                       }
                     }
                   }
@@ -819,209 +818,218 @@
             }
           }
         }
-      },
-      "CreateAlertRequest": {
-        "type": "object",
-        "required": ["title", "message", "severity", "type"],
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Critical Vulnerability Detected"
-          },
-          "message": {
-            "type": "string",
-            "example": "A critical vulnerability has been detected in your website. Please review the scan results and take action."
-          },
-          "severity": {
-            "type": "string",
-            "enum": ["critical", "high", "medium", "low", "info"],
-            "example": "critical"
-          },
-          "type": {
-            "type": "string",
-            "example": "security"
-          },
-          "url": {
-            "type": "string",
-            "example": "https://example.com"
-          },
-          "scanId": {
-            "type": "string",
-            "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
-          },
-          "data": {
-            "type": "object",
-            "description": "Additional data related to the alert"
-          }
+      }
+    },
+    "CreateAlertRequest": {
+      "type": "object",
+      "required": ["title", "message", "severity", "type"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Critical Vulnerability Detected"
+        },
+        "message": {
+          "type": "string",
+          "example": "A critical vulnerability has been detected in your website. Please review the scan results and take action."
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "info"],
+          "example": "critical"
+        },
+        "type": {
+          "type": "string",
+          "example": "security"
+        },
+        "url": {
+          "type": "string",
+          "example": "https://example.com"
+        },
+        "scanId": {
+          "type": "string",
+          "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+        },
+        "data": {
+          "type": "object",
+          "description": "Additional data related to the alert"
         }
-      },
-      "AlertResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "_id": {
-                "type": "string",
-                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
-              },
-              "userId": {
-                "type": "string",
-                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
-              },
-              "title": {
-                "type": "string",
-                "example": "Critical Vulnerability Detected"
-              },
-              "message": {
-                "type": "string",
-                "example": "A critical vulnerability has been detected in your website."
-              },
-              "severity": {
-                "type": "string",
-                "enum": ["critical", "high", "medium", "low", "info"],
-                "example": "critical"
-              },
-              "type": {
-                "type": "string",
-                "example": "security"
-              },
-              "status": {
-                "type": "string",
-                "enum": ["new", "read", "resolved", "ignored"],
-                "example": "new"
-              },
-              "createdAt": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "url": {
-                "type": "string",
-                "example": "https://example.com"
-              },
-              "scanId": {
-                "type": "string",
-                "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
-              }
+      }
+    },
+    "AlertResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+            },
+            "userId": {
+              "type": "string",
+              "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+            },
+            "title": {
+              "type": "string",
+              "example": "Critical Vulnerability Detected"
+            },
+            "message": {
+              "type": "string",
+              "example": "A critical vulnerability has been detected in your website."
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["critical", "high", "medium", "low", "info"],
+              "example": "critical"
+            },
+            "type": {
+              "type": "string",
+              "example": "security"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["new", "read", "resolved", "ignored"],
+              "example": "new"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "url": {
+              "type": "string",
+              "example": "https://example.com"
+            },
+            "scanId": {
+              "type": "string",
+              "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
             }
-          }
-        }
-      },
-      "AlertListResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "total": {
-                "type": "integer",
-                "example": 50
-              },
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 10
-              },
-              "pages": {
-                "type": "integer",
-                "example": 5
-              }
-            }
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AlertResponse/properties/data"
-            }
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": false
-          },
-          "error": {
-            "type": "string",
-            "example": "Invalid credentials"
-          },
-          "statusCode": {
-            "type": "integer",
-            "example": 401
           }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+    "AlertListResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "example": 50
+            },
+            "page": {
+              "type": "integer",
+              "example": 1
+            },
+            "limit": {
+              "type": "integer",
+              "example": 10
+            },
+            "pages": {
+              "type": "integer",
+              "example": 5
+            }
+          }
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AlertResponse/properties/data"
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": false
+        },
+        "error": {
+          "type": "string",
+          "example": "Invalid credentials"
+        },
+        "statusCode": {
+          "type": "integer",
+          "example": 401
+        }
+      }
+    }
+  },
+  "securitySchemes": {
+    "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  },
+
+  "ReportListResponse": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean",
+        "example": true
+      },
+      "pagination": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 50
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "example": 10
+          },
+          "pages": {
+            "type": "integer",
+            "example": 5
+          }
+        }
+      },
+      "data": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
+            },
+            "url": {
+              "type": "string",
+              "example": "https://example.com"
+            },
+            "completedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "overall": {
+                  "type": "integer",
+                  "example": 82
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 }
-      "ReportListResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "total": {
-                "type": "integer",
-                "example": 50
-              },
-              "page": {
-                "type": "integer",
-                "example": 1
-              },
-              "limit": {
-                "type": "integer",
-                "example": 10
-              },
-              "pages": {
-                "type": "integer",
-                "example": 5
-              }
-            }
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "_id": {
-                  "type": "string",
-                  "example": "5f8d0c1b2c3d4e5f6a7b8c9d"
-                },
-                "url": {
-                  "type": "string",
-                  "example": "https://example.com"
-                },
-                "completedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "summary": {
-                  "type": "object",
-                  "properties": {
-                    "overall": {
-                      "type": "integer",
-                      "example": 82
