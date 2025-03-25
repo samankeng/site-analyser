@@ -121,10 +121,15 @@ export const login = (email, password) => async dispatch => {
 
   try {
     const response = await authService.login(email, password);
+    console.log('Login response:', response); // Add this for debugging
 
     dispatch({
       type: LOGIN_SUCCESS,
-      payload: response.user,
+      payload: {
+        // Include both user and token in the payload
+        user: response.user,
+        token: response.token,
+      },
     });
 
     dispatch(setSuccessAlert('Login successful'));

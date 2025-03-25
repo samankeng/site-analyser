@@ -19,13 +19,11 @@ class AuthController {
    */
   register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
-    console.log('Registration request body:', req.body);
+
     try {
-      console.log('Checking MongoDB connection state:', mongoose.connection.readyState);
-      console.log('Checking if user exists with email:', email);
       // Check if user already exists
       const existingUser = await User.findOne({ email }).maxTimeMS(5000);
-      console.log('User exists check completed:', existingUser ? 'Found user' : 'No user found');
+
       if (existingUser) {
         throw new ApiError(400, 'User with this email already exists');
       }
@@ -66,7 +64,6 @@ class AuthController {
           : 'User registered. Please verify your email address',
       });
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     }
   });

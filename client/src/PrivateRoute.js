@@ -1,59 +1,92 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress, Box, Typography } from '@mui/material';
 
-/**
- * PrivateRoute component to protect routes that require authentication
- * Updated for React 19 and MUI v6
- *
- * @param {Object} props - Component props
- * @param {React.ReactNode} props.element - Element to render (preferred in React 19 over children)
- * @param {Object} props.requireRoles - Optional roles required to access this route
- */
+// Define debug mode - set to false for production
+const DEBUG_MODE = true;
+
 const PrivateRoute = ({ element, requireRoles = [] }) => {
   const location = useLocation();
+
+  // Get the full Redux state
+  const fullState = useSelector(state => state);
+
+  // Debug logging for full state
+  if (DEBUG_MODE) {
+    console.log('PrivateRoute - Full Redux State:', fullState);
+  }
+
+  // Extract auth state
   const { isAuthenticated, loading, user } = useSelector(state => state.auth);
 
-  // Loading state with MUI v6 CircularProgress
+  // Debug logging
+  useEffect(() => {
+    console.log('PrivateRoute - Auth State:', {
+      isAuthenticated,
+      loading,
+      user,
+      path: location.pathname,
+    });
+  }, [isAuthenticated, loading, user, location.pathname]);
+
+  // Loading state
   if (loading) {
+    console.log('PrivateRoute - Showing loading state');
     return (
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '100vh',
+          height: '80vh',
         }}
       >
-        <CircularProgress color="primary" />
+        <CircularProgress color="primary" size={60} thickness={5} />
+        <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+          Loading your data...
+        </Typography>
       </Box>
     );
   }
 
-  // If not authenticated, redirect to login with the current location state
+  // If not authenticated, redirect to login
   if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to login from', location.pathname);
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // If roles are required, check if user has the required role
-  if (requireRoles.length > 0) {
-    const userRoles = user?.roles || [];
-    const hasRequiredRole = requireRoles.some(role => userRoles.includes(role));
+  // For debugging - wrap the element with visual indicators in debug mode
+  const wrappedElement = DEBUG_MODE ? (
+    <Box
+      sx={{
+        position: 'relative',
+        border: '1px dashed #1976d2',
+        padding: '2px',
+        minHeight: '200px',
+      }}
+    >
+      {element}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+          padding: '2px 8px',
+          borderRadius: '0 0 0 4px',
+          fontSize: '10px',
+        }}
+      >
+        Protected Route: {location.pathname}
+      </Box>
+    </Box>
+  ) : (
+    element
+  );
 
-    if (!hasRequiredRole) {
-      // Redirect to unauthorized page or dashboard
-      return (
-        <Navigate
-          to="/unauthorized"
-          state={{ from: location.pathname, requiredRoles: requireRoles }}
-          replace
-        />
-      );
-    }
-  }
-
-  // Use Suspense for lazy-loaded components in React 19
+  // Render the protected route
   return (
     <Suspense
       fallback={
@@ -69,7 +102,7 @@ const PrivateRoute = ({ element, requireRoles = [] }) => {
         </Box>
       }
     >
-      {element}
+      {wrappedElement}
     </Suspense>
   );
 };

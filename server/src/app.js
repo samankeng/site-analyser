@@ -131,9 +131,4 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// In app.js, add this before your API routes
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Public endpoint works' });
-});
-
 module.exports = app;

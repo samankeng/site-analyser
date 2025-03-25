@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Container, Typography, Button, Paper, Box } from '@mui/material';
 import { styled } from '@mui/system';
@@ -41,6 +42,7 @@ const ErrorPage = ({
   message = 'An unexpected error occurred. Please try again later.',
   error,
 }) => {
+  const navigate = useNavigate();
   // Log error to console for debugging
   useEffect(() => {
     if (error) {

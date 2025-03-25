@@ -21,12 +21,20 @@ export const fetchDashboardData = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       dispatch({ type: DASHBOARD_DATA_REQUEST });
+      console.log('Fetching dashboard data from API...');
 
-      const [scansResponse, alertsResponse, scoreResponse] = await Promise.all([
-        api.get('/scans/recent'),
-        api.get('/alerts/recent'),
-        api.get('/dashboard/security-score'),
-      ]);
+      // Log each API request separately
+      console.log('Fetching recent scans...');
+      const scansResponse = await api.get('/scans/recent');
+      console.log('Scans response:', scansResponse.data);
+
+      console.log('Fetching recent alerts...');
+      const alertsResponse = await api.get('/alerts/recent');
+      console.log('Alerts response:', alertsResponse.data);
+
+      console.log('Fetching security score...');
+      const scoreResponse = await api.get('/dashboard/security-score');
+      console.log('Score response:', scoreResponse.data);
 
       const dashboardData = {
         recentScans: scansResponse.data.data,
@@ -34,6 +42,7 @@ export const fetchDashboardData = createAsyncThunk(
         securityScore: scoreResponse.data.data,
       };
 
+      console.log('Dashboard data assembled:', dashboardData);
       dispatch({
         type: DASHBOARD_DATA_SUCCESS,
         payload: dashboardData,
@@ -41,6 +50,7 @@ export const fetchDashboardData = createAsyncThunk(
 
       return dashboardData;
     } catch (err) {
+      console.error('Dashboard data fetch error:', err);
       const errorMessage = err.response?.data?.message || 'Failed to fetch dashboard data';
 
       dispatch({

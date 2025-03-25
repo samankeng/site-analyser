@@ -12,7 +12,7 @@ import {
  */
 const useScan = () => {
   const dispatch = useDispatch();
-  const { currentScan, scanHistory, loading, error } = useSelector(state => state.scans);
+  const { currentScan, scanHistory = [], loading, error } = useSelector(state => state.scans);
 
   // Start a new scan
   const startScan = useCallback(

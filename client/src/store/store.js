@@ -34,10 +34,10 @@ const persistConfig = {
 // Combine all reducers
 const rootReducer = combineReducers({
   auth: authReducer,
-  alerts: alertReducer, // Changed from 'alert' to 'alerts' to match selector naming
+  alert: alertReducer,
   dashboard: dashboardReducer,
   scans: scanReducer, // Changed from 'scan' to 'scans' to match selector naming
-  report: reportReducer,
+  reports: reportReducer,
 });
 
 // Create persisted reducer

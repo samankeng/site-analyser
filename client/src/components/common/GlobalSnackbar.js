@@ -14,7 +14,8 @@ import { selectAlerts } from '../../store/selectors/alertSelectors';
  */
 const GlobalSnackbar = () => {
   const dispatch = useDispatch();
-  const alerts = useSelector(selectAlerts);
+  // Directly access the alerts from your Redux store
+  const alerts = useSelector(state => state.alert?.alerts || []);
   const [open, setOpen] = useState(false);
   const [currentAlert, setCurrentAlert] = useState(null);
 

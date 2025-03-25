@@ -48,6 +48,57 @@ const LoadingContainer = styled(Box)({
   height: '200px',
 });
 
+// Mock data for immediate UI display
+const mockScans = [
+  {
+    id: '1',
+    url: 'https://example.com',
+    status: 'completed',
+    createdAt: new Date().toISOString(),
+    vulnerabilityCount: 12,
+    vulnerabilities: [
+      { id: '1', type: 'Critical', severity: 'critical' },
+      { id: '2', type: 'High', severity: 'high' },
+      { id: '3', type: 'Medium', severity: 'medium' },
+      { id: '4', type: 'Low', severity: 'low' },
+    ],
+  },
+  {
+    id: '2',
+    url: 'https://test-site.com',
+    status: 'completed',
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    vulnerabilityCount: 5,
+    vulnerabilities: [
+      { id: '5', type: 'High', severity: 'high' },
+      { id: '6', type: 'Medium', severity: 'medium' },
+      { id: '7', type: 'Low', severity: 'low' },
+    ],
+  },
+];
+
+// Mock alerts for the alert widget
+const mockAlerts = [
+  {
+    id: '1',
+    title: 'Critical Vulnerability Detected',
+    message: 'SSL certificate expiring in 3 days',
+    type: 'security',
+    severity: 'critical',
+    createdAt: new Date().toISOString(),
+    read: false,
+  },
+  {
+    id: '2',
+    title: 'Security Headers Missing',
+    message: 'X-Content-Type-Options header not set',
+    type: 'security',
+    severity: 'medium',
+    createdAt: new Date(Date.now() - 43200000).toISOString(),
+    read: true,
+  },
+];
+
 const Dashboard = () => {
   console.log('Dashboard rendering attempt...');
   const { user } = useAuth();
@@ -55,18 +106,27 @@ const Dashboard = () => {
   const { mode, toggleThemeMode } = useTheme();
   const { addAlert } = useAlert();
 
-  const [recentScans, setRecentScans] = useState([]);
-  const [securityScore, setSecurityScore] = useState(null);
-  const [vulnerabilities, setVulnerabilities] = useState([]);
+  const [recentScans, setRecentScans] = useState(mockScans);
+  const [securityScore, setSecurityScore] = useState(78);
+  const [vulnerabilities, setVulnerabilities] = useState([
+    { name: 'Critical', count: 2 },
+    { name: 'High', count: 5 },
+    { name: 'Medium', count: 8 },
+    { name: 'Low', count: 12 },
+    { name: 'Info', count: 3 },
+  ]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        console.log('Attempting to fetch dashboard data...');
         // Fetch recent scans
         const scans = await getRecentScans(5);
-        setRecentScans(scans);
+        console.log('Fetched scans:', scans);
 
-        if (scans.length) {
+        if (scans && scans.length) {
+          setRecentScans(scans);
+
           // Extract vulnerability data for chart
           const vulnData = processVulnerabilityData(scans);
           setVulnerabilities(vulnData);
@@ -74,6 +134,9 @@ const Dashboard = () => {
           // Get security score
           const score = calculateSecurityScore(scans);
           setSecurityScore(score);
+        } else {
+          console.log('No scans returned, using mock data');
+          // Keep using mock data if API returns empty
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -119,7 +182,10 @@ const Dashboard = () => {
       </LoadingContainer>
     );
   }
-  console.log(user);
+
+  console.log('User data:', user);
+  console.log('Current scans data:', recentScans);
+
   return (
     <StyledContainer maxWidth="xl">
       <HeaderContainer>
@@ -150,7 +216,7 @@ const Dashboard = () => {
         {/* Alerts Widget */}
         <Grid item xs={12} md={8}>
           <StyledPaper elevation={3}>
-            <AlertsWidget />
+            <AlertsWidget alerts={mockAlerts} />
           </StyledPaper>
         </Grid>
 

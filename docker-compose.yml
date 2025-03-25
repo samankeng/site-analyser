@@ -47,8 +47,8 @@ services:
       - NODE_ENV=development # Change to development for troubleshooting
       - PORT=3000
       # - MONGODB_URI=mongodb://mongodb:27017/site-analyser
-      - MONGODB_URI=mongodb://admin:secure_password@172.18.0.4:27017/site-analyser?authSource=admin&directConnection=true
-      - MONGO_URI=mongodb://admin:secure_password@172.18.0.4:27017/site-analyser?authSource=admin&directConnection=true
+      - MONGODB_URI=mongodb://admin:secure_password@site-analyser-mongodb-1:27017/site-analyser?authSource=admin&directConnection=true
+      - MONGO_URI=mongodb://admin:secure_password@site-analyser-mongodb-1:27017/site-analyser?authSource=admin&directConnection=true
       - REDIS_URL=redis://redis:6379
       - AI_SERVICE_URL=http://ai-service:8000/api
       - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here}

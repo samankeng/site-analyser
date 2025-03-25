@@ -50,7 +50,7 @@ export const AlertProvider = ({ children }) => {
   const [state, dispatch] = useReducer(alertReducer, initialState);
   const reduxAlerts = useSelector(state => {
     console.log('Redux state in AlertContext:', state);
-    state.alert?.alerts || [];
+    return state.alert?.alerts || [];
   });
 
   // Current visible alert state

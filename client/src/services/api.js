@@ -23,7 +23,7 @@ api.interceptors.request.use(
     }
 
     // Add timestamp to prevent caching issues (optional)
-    // In api.js, modify the request interceptor
+
     if (config.method.toLowerCase() === 'get') {
       // Only add timestamp to GET requests to prevent caching
       config.params = {

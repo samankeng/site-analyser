@@ -30,16 +30,33 @@ import {
 } from '../../store/actions/authActions';
 import Loader from '../../components/common/Loader';
 
-const Account = () => {
-  const dispatch = useDispatch();
-  const { user, loading, error } = useSelector(state => state.auth);
+// Define a debug mode constant - set to false for production
+const DEBUG_MODE = true;
 
+const Account = () => {
+  console.log('Account component is mounting');
+
+  const dispatch = useDispatch();
+
+  // Get the full Redux state
+  const reduxState = useSelector(state => state);
+
+  // Log the full Redux state if in debug mode
+  if (DEBUG_MODE) {
+    console.log('Full Redux State in Account component:', reduxState);
+  }
+
+  // Extract auth-related state
+  const { user, loading, error, isAuthenticated } = useSelector(state => state.auth);
+
+  // Log authentication state
+  console.log('Auth State in Account:', { user, loading, error, isAuthenticated });
+
+  // Simplified profile data that matches server structure
   const [profileData, setProfileData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    company: '',
-    jobTitle: '',
+    role: '',
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -58,16 +75,19 @@ const Account = () => {
     severity: 'success',
   });
 
+  // Clean up useEffect to directly use fields from the API
   useEffect(() => {
+    console.log('useEffect triggered - user:', user);
     if (user) {
-      console.log('User object in Account component:', user);
-      setProfileData({
-        firstName: user.firstName || user.name?.split(' ')[0] || '',
-        lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
+      // Only use fields that actually come from the server
+      const newProfileData = {
+        name: user.name || '',
         email: user.email || '',
-        company: user.company || user.organization || '',
-        jobTitle: user.jobTitle || user.title || user.role || '',
-      });
+        role: user.role || '',
+      };
+
+      console.log('Setting profile data to:', newProfileData);
+      setProfileData(newProfileData);
     }
   }, [user]);
 
@@ -88,6 +108,7 @@ const Account = () => {
   };
 
   const handleSaveProfile = () => {
+    console.log('Saving profile with data:', profileData);
     dispatch(updateUserProfile(profileData))
       .then(() => {
         setEditMode(false);
@@ -97,7 +118,8 @@ const Account = () => {
           severity: 'success',
         });
       })
-      .catch(() => {
+      .catch(error => {
+        console.error('Profile update error:', error);
         setSnackbar({
           open: true,
           message: 'Failed to update profile',
@@ -176,31 +198,71 @@ const Account = () => {
     }));
   };
 
-  if (loading) return <Loader />;
+  // Add a pre-render log to check what's about to be rendered
+  console.log('Account component about to render with:', {
+    profileData,
+    user,
+    loading,
+    isAuthenticated,
+  });
+
+  if (loading) {
+    console.log('Account showing loading state');
+    return <Loader />;
+  }
 
   if (!user) {
+    console.log('Account showing user not available state');
     return (
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, border: DEBUG_MODE ? '2px solid red' : 'none' }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Account Settings
         </Typography>
         <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
           <Typography variant="body1">User data not available. Please log in again.</Typography>
+          {DEBUG_MODE && (
+            <Box mt={2}>
+              <Alert severity="warning">
+                DEBUG: Authentication state:{' '}
+                {isAuthenticated ? 'Authenticated' : 'Not authenticated'}
+              </Alert>
+            </Box>
+          )}
         </Paper>
       </Box>
     );
   }
+
+  // Main component render
   return (
-    <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        p: 3,
+        border: DEBUG_MODE ? '2px solid green' : 'none',
+        backgroundColor: DEBUG_MODE ? 'rgba(0, 255, 0, 0.05)' : 'transparent',
+      }}
+    >
       <Typography variant="h4" component="h1" gutterBottom>
-        Account Settings
+        Account Settings {DEBUG_MODE && '(Debug Mode Active)'}
       </Typography>
-      <Box sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-        <Typography variant="subtitle2" gutterBottom>
-          Debug - User Object
-        </Typography>
-        <pre style={{ overflow: 'auto', maxHeight: '200px' }}>{JSON.stringify(user, null, 2)}</pre>
-      </Box>
+
+      {DEBUG_MODE && (
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            Debug - Authentication State
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            isAuthenticated: {isAuthenticated ? 'true' : 'false'}, loading:{' '}
+            {loading ? 'true' : 'false'}
+          </Alert>
+          <Typography variant="subtitle2" gutterBottom>
+            Debug - User Object
+          </Typography>
+          <pre style={{ overflow: 'auto', maxHeight: '200px' }}>
+            {JSON.stringify(user, null, 2)}
+          </pre>
+        </Box>
+      )}
 
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -209,7 +271,7 @@ const Account = () => {
           </Typography>
           <Button
             startIcon={editMode ? <SaveIcon /> : <EditIcon />}
-            variant={editMode ? 'filled' : 'outlined'}
+            variant={editMode ? 'contained' : 'outlined'}
             color={editMode ? 'primary' : 'secondary'}
             onClick={() => (editMode ? handleSaveProfile() : setEditMode(true))}
           >
@@ -224,11 +286,9 @@ const Account = () => {
             md={3}
             sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
           >
-            <Avatar
-              sx={{ width: 100, height: 100, mb: 2 }}
-              src={user?.profilePicture}
-              alt={`${profileData.firstName} ${profileData.lastName}`}
-            />
+            <Avatar sx={{ width: 100, height: 100, mb: 2 }} alt={profileData.name}>
+              {profileData.name?.charAt(0)?.toUpperCase() || 'U'}
+            </Avatar>
             {editMode && (
               <Button variant="outlined" startIcon={<UploadIcon />} size="small">
                 Upload Photo
@@ -238,24 +298,12 @@ const Account = () => {
 
           <Grid item xs={12} md={9}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="First Name"
-                  name="firstName"
-                  value={profileData.firstName}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                  variant={editMode ? 'outlined' : 'filled'}
-                  margin="normal"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  name="lastName"
-                  value={profileData.lastName}
+                  label="Full Name"
+                  name="name"
+                  value={profileData.name}
                   onChange={handleProfileChange}
                   disabled={!editMode}
                   variant={editMode ? 'outlined' : 'filled'}
@@ -275,30 +323,55 @@ const Account = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Company"
-                  name="company"
-                  value={profileData.company}
+                  label="Role"
+                  name="role"
+                  value={profileData.role}
                   onChange={handleProfileChange}
                   disabled={!editMode}
                   variant={editMode ? 'outlined' : 'filled'}
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Job Title"
-                  name="jobTitle"
-                  value={profileData.jobTitle}
-                  onChange={handleProfileChange}
-                  disabled={!editMode}
-                  variant={editMode ? 'outlined' : 'filled'}
-                  margin="normal"
-                />
-              </Grid>
+              {/* Additional user fields can be displayed here if needed */}
+              {user.lastLogin && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Last Login"
+                    value={new Date(user.lastLogin).toLocaleString()}
+                    disabled={true}
+                    variant="filled"
+                    margin="normal"
+                  />
+                </Grid>
+              )}
+              {user.emailVerified !== undefined && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email Verification Status"
+                    value={user.emailVerified ? 'Verified' : 'Not Verified'}
+                    disabled={true}
+                    variant="filled"
+                    margin="normal"
+                  />
+                </Grid>
+              )}
+              {user.mfaEnabled !== undefined && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Two-Factor Authentication"
+                    value={user.mfaEnabled ? 'Enabled' : 'Disabled'}
+                    disabled={true}
+                    variant="filled"
+                    margin="normal"
+                  />
+                </Grid>
+              )}
             </Grid>
 
             {editMode && (
@@ -313,7 +386,7 @@ const Account = () => {
                 </Button>
                 <Button
                   color="primary"
-                  variant="filled"
+                  variant="contained"
                   startIcon={<SaveIcon />}
                   onClick={handleSaveProfile}
                 >
@@ -390,7 +463,7 @@ const Account = () => {
                   >
                     Cancel
                   </Button>
-                  <Button color="primary" variant="filled" onClick={handleUpdatePassword}>
+                  <Button color="primary" variant="contained" onClick={handleUpdatePassword}>
                     Update Password
                   </Button>
                 </Box>
@@ -398,6 +471,18 @@ const Account = () => {
             </Grid>
           )}
         </Box>
+
+        {user.preferences && (
+          <>
+            <Divider sx={{ my: 3 }} />
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                User Preferences
+              </Typography>
+              <pre>{JSON.stringify(user.preferences, null, 2)}</pre>
+            </Box>
+          </>
+        )}
 
         <Divider sx={{ my: 3 }} />
 
@@ -439,7 +524,7 @@ const Account = () => {
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button
             color="error"
-            variant="filled"
+            variant="contained"
             onClick={handleDeleteAccount}
             disabled={deleteConfirmText !== user?.email}
           >

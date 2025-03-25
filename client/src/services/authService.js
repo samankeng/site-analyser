@@ -371,7 +371,7 @@ const authService = {
    * @returns {boolean} Authentication status
    */
   isAuthenticated: () => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('token');
     return !!token;
   },
 

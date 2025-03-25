@@ -15,13 +15,14 @@ import {
 
 const initialState = {
   token: localStorage.getItem('token'),
-  isAuthenticated: null,
-  loading: false,
+  // Change null to false for initial authentication state
+  isAuthenticated: false,
+  // Set loading to true initially to handle initial auth check
+  loading: true,
   user: null,
   error: null,
 };
 
-// Updated to be more compatible with React 19's immutability expectations
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
     case USER_LOADED:
@@ -44,16 +45,16 @@ const authReducer = (state = initialState, action) => {
     case REGISTER_SUCCESS:
     case LOGIN_SUCCESS:
       // Store token in localStorage
-      if (action.payload.token) {
+      if (action.payload && action.payload.token) {
         localStorage.setItem('token', action.payload.token);
       }
 
       return {
         ...state,
-        token: action.payload.token,
+        token: action.payload.token || null,
         isAuthenticated: true,
         loading: false,
-        user: action.payload,
+        user: action.payload?.user || action.payload,
       };
 
     case UPDATE_PROFILE_SUCCESS:
