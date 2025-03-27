@@ -104,12 +104,18 @@ const SubmitButton = styled(Button)(({ theme }) => ({
  *
  * @param {Object} props - Component props
  * @param {Function} props.onSubmit - Function called when form is submitted
- * @param {Function} props.onScanComplete - Alternative name for onSubmit (for backwards compatibility)
+ * @param {Function} props.onScanInitiated - Function called when scan is successfully initiated
  * @param {boolean} props.isLoading - Whether a scan is in progress
  * @param {Object} props.initialValues - Initial form values
  * @param {Object} props.rest - Any other props to pass to the Root component
  */
-const ScanForm = ({ onSubmit, onScanComplete, isLoading = false, initialValues = {}, ...rest }) => {
+const ScanForm = ({
+  onSubmit,
+  onScanInitiated,
+  isLoading = false,
+  initialValues = {},
+  ...rest
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
@@ -235,37 +241,75 @@ const ScanForm = ({ onSubmit, onScanComplete, isLoading = false, initialValues =
 
     // Prepare form data
     const formData = {
-      url,
-      scanDepth,
-      options,
+      url: url,
+      scanDepth: scanDepth,
+      options: {
+        sslCheck: options.sslCheck || false,
+        headerAnalysis: options.headerAnalysis || false,
+        portScan: options.portScan || false,
+        vulnDetection: options.vulnDetection || false,
+        contentAnalysis: options.contentAnalysis || false,
+        performanceCheck: options.performanceCheck || false,
+      },
     };
     console.log('Scan data prepared:', formData);
 
     // First, call any parent-provided handlers (for backward compatibility)
     if (typeof onSubmit === 'function') {
       onSubmit(formData);
-    } else if (typeof onScanComplete === 'function') {
-      onScanComplete(formData);
+    } else if (typeof onScanInitiated === 'function') {
+      onScanInitiated(formData);
     }
 
     // Then, handle the API call directly if no parent handlers were provided
     // or if we're on the HomePage (which doesn't handle API calls)
-    if (!onSubmit && !onScanComplete) {
+    if (!onSubmit && !onScanInitiated) {
       console.log('No parent handlers provided, making API call directly');
       setLocalLoading(true);
 
       // Use the Redux action to start the scan
+      const token = localStorage.getItem('token');
+
+      console.log('Token before scan request:', token ? 'Token exists' : 'No token');
+      console.log(token);
+
+      if (!token) {
+        console.error('No Authentication token found');
+        return;
+      }
+      const requestConfig = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
       startScan(formData)
         .then(result => {
-          console.log('Scan started successfully:', result);
+          console.log('Scan started result:', result);
 
-          // Navigate to the appropriate page based on the result
-          if (result && result.id) {
-            navigate(`/scans/${result.id}`);
+          // Check for rejected promise with error payload
+          if (result && result.type && result.type.includes('rejected')) {
+            console.error('Scan failed:', result.payload || result.error?.message);
+            return; // Don't navigate if there was an error
+          }
+
+          // Handle different response structures correctly
+          let scanId;
+
+          if (result && result.payload && result.payload.data) {
+            // Standard backend API response format: { success: true, data: {...} }
+            scanId = result.payload.data.scanId;
+          } else if (result && result.payload && result.payload.scanId) {
+            // Direct payload format
+            scanId = result.payload.scanId;
           } else if (result && result.scanId) {
-            navigate(`/scans/${result.scanId}`);
+            // Direct result format
+            scanId = result.scanId;
+          }
+
+          if (scanId) {
+            navigate(`/scans/${scanId}`);
           } else {
-            // If no ID is found, go to dashboard
+            // Fall back to dashboard
             navigate('/dashboard');
           }
         })

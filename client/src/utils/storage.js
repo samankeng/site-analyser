@@ -75,8 +75,8 @@ const getStorage = (persistent = true) => {
  */
 export const storeToken = (token, remember = true) => {
   if (token) {
-    localStorage.setItem('token', token);
-    //getStorage(remember).setItem(TOKEN_KEY, token);
+    //localStorage.setItem('token', token);
+    getStorage(remember).setItem(TOKEN_KEY, token);
   }
 };
 
@@ -86,17 +86,17 @@ export const storeToken = (token, remember = true) => {
  */
 export const getStoredToken = () => {
   // Try local storage first, then session storage
-  return localStorage.getItem('token');
-  //getStorage(true).getItem(TOKEN_KEY) || getStorage(false).getItem(TOKEN_KEY);
+  //return localStorage.getItem('token');
+  return getStorage(true).getItem(TOKEN_KEY) || getStorage(false).getItem(TOKEN_KEY);
 };
 
 /**
  * Remove token from all storage locations
  */
 export const removeToken = () => {
-  localStorage.removeItem('token');
-  //getStorage(true).removeItem(TOKEN_KEY);
-  //getStorage(false).removeItem(TOKEN_KEY);
+  //localStorage.removeItem('token');
+  getStorage(true).removeItem(TOKEN_KEY);
+  getStorage(false).removeItem(TOKEN_KEY);
 };
 
 /**

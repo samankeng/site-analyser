@@ -18,6 +18,17 @@ import {
 } from '../actions/types';
 
 /**
+ * Scan status constants
+ */
+const SCAN_STATUS = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+};
+
+/**
  * Initial state for scan management
  * Structured for React 19 compatibility
  */
@@ -133,7 +144,7 @@ const scanReducer = (state = initialState, action) => {
         scan: state.scan
           ? {
               ...state.scan,
-              status: 'cancelled',
+              status: SCAN_STATUS.CANCELLED,
             }
           : null,
         error: null,

@@ -23,6 +23,31 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 /**
+ * Scan status constants
+ */
+const SCAN_STATUS = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+};
+
+/**
+ * API route constants
+ */
+const API_ROUTES = {
+  SCAN: {
+    BASE: '/scans',
+    START: '/scans',
+    STATUS: '/scans/:scanId',
+    RESULTS: '/scans/:scanId/results',
+    CANCEL: '/scans/:scanId',
+    RECENT: '/scans/recent'
+  }
+};
+
+/**
  * Initiate a new security scan (React 19 & MUI v6 compatible)
  */
 export const initiateScan = createAsyncThunk(
@@ -33,9 +58,11 @@ export const initiateScan = createAsyncThunk(
       dispatch({ type: SCAN_REQUEST });
       console.log('About to make API call to /scans');
 
-      const res = await api.post('/scans', scanData);
+      const res = await api.post(API_ROUTES.SCAN.START, scanData);
       console.log('API response:', res);
-      const scanResult = res.data.data;
+      
+      // Extract scan result properly from API response
+      const scanResult = res.data.data || res.data;
 
       dispatch({
         type: SCAN_SUCCESS,
@@ -69,8 +96,8 @@ export const getScanStatus = createAsyncThunk(
     try {
       dispatch({ type: SCAN_STATUS_REQUEST });
 
-      const res = await api.get(`/scans/${scanId}`);
-      const statusData = res.data.data;
+      const res = await api.get(API_ROUTES.SCAN.STATUS.replace(':scanId', scanId));
+      const statusData = res.data.data || res.data;
 
       dispatch({
         type: SCAN_STATUS_SUCCESS,
@@ -101,8 +128,8 @@ export const getScanResults = createAsyncThunk(
     try {
       dispatch({ type: SCAN_RESULTS_REQUEST });
 
-      const res = await api.get(`/scans/${scanId}/results`);
-      const resultsData = res.data.data;
+      const res = await api.get(API_ROUTES.SCAN.RESULTS.replace(':scanId', scanId));
+      const resultsData = res.data.data || res.data;
 
       dispatch({
         type: SCAN_RESULTS_SUCCESS,
@@ -133,7 +160,7 @@ export const cancelScan = createAsyncThunk(
     try {
       dispatch({ type: SCAN_CANCEL_REQUEST });
 
-      const res = await api.delete(`/scans/${scanId}`);
+      const res = await api.delete(API_ROUTES.SCAN.CANCEL.replace(':scanId', scanId));
 
       dispatch({
         type: SCAN_CANCEL_SUCCESS,
@@ -166,8 +193,8 @@ export const getRecentScans = createAsyncThunk(
     try {
       dispatch({ type: RECENT_SCANS_REQUEST });
 
-      const res = await api.get('/scans/recent');
-      const scansData = res.data.data;
+      const res = await api.get(API_ROUTES.SCAN.RECENT);
+      const scansData = res.data.data || res.data;
 
       dispatch({
         type: RECENT_SCANS_SUCCESS,

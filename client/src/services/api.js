@@ -34,7 +34,7 @@ api.interceptors.request.use(
 
     // Log outgoing requests for debugging
     console.log(`API Request: ${config.method.toUpperCase()} ${config.url}`, config);
-
+    console.log('Full request body:', config.data);
     return config;
   },
   error => {

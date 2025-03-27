@@ -1,0 +1,1 @@
+docker run --rm -it --network host mongo mongosh "mongodb://admin:secure_password@localhost:27017/site-analyser?authSource=admin"

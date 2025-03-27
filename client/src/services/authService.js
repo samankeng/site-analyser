@@ -21,6 +21,10 @@ const authService = {
       storeToken(token);
       storeUser(user);
 
+      // Verify token was saved
+      const savedToken = localStorage.getItem('token');
+      console.log('Token saved verification:', !!savedToken);
+
       return response.data;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);

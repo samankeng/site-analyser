@@ -60,29 +60,39 @@ const Dashboard = () => {
   const [vulnerabilities, setVulnerabilities] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchDashboardData = async () => {
       try {
-        // Fetch recent scans
-        const scans = await getRecentScans(5);
-        setRecentScans(scans);
+        const response = await getRecentScans(5);
 
-        if (scans.length) {
-          // Extract vulnerability data for chart
-          const vulnData = processVulnerabilityData(scans);
-          setVulnerabilities(vulnData);
+        if (isMounted && response && response.data) {
+          // The actual scan data is in response.data based on your backend
+          const scans = response.data || [];
+          setRecentScans(scans);
 
-          // Get security score
-          const score = calculateSecurityScore(scans);
-          setSecurityScore(score);
+          if (scans.length) {
+            const vulnData = processVulnerabilityData(scans);
+            setVulnerabilities(vulnData);
+
+            const score = calculateSecurityScore(scans);
+            setSecurityScore(score);
+          }
         }
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        addAlert('Failed to load dashboard data', 'error');
+        if (isMounted) {
+          console.error('Error fetching dashboard data:', error);
+          addAlert('Failed to load dashboard data', 'error');
+        }
       }
     };
 
     fetchDashboardData();
-  }, [getRecentScans, addAlert]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Process vulnerability data for chart
   const processVulnerabilityData = scans => {

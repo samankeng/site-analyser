@@ -28,6 +28,17 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import WarningIcon from '@mui/icons-material/Warning';
 import { formatDuration } from '../../utils/formatters';
 
+/**
+ * Scan status constants
+ */
+const SCAN_STATUS = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+};
+
 // Using styled API instead of makeStyles
 const Root = styled(Paper)(({ theme }) => ({
   width: '100%',
@@ -165,7 +176,7 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
   useEffect(() => {
     let timer;
 
-    if (scan.status === 'in_progress' || scan.status === 'pending') {
+    if (scan.status === SCAN_STATUS.IN_PROGRESS || scan.status === SCAN_STATUS.PENDING) {
       timer = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
@@ -207,15 +218,15 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
   // Get status icon
   const getStatusIcon = status => {
     switch (status) {
-      case 'completed':
+      case SCAN_STATUS.COMPLETED:
         return <IconCompleted />;
-      case 'failed':
+      case SCAN_STATUS.FAILED:
         return <IconError />;
-      case 'cancelled':
+      case SCAN_STATUS.CANCELLED:
         return <IconCancel />;
-      case 'in_progress':
+      case SCAN_STATUS.IN_PROGRESS:
         return <IconProgress size={20} />;
-      case 'pending':
+      case SCAN_STATUS.PENDING:
         return <IconProgress size={20} />;
       default:
         return null;
@@ -281,12 +292,13 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
           variant="determinate"
           value={scan.progress || 0}
           color={
-            scan.status === 'failed' ? 'error' : scan.status === 'completed' ? 'primary' : 'primary'
+            scan.status === SCAN_STATUS.FAILED ? 'error' : 
+            scan.status === SCAN_STATUS.COMPLETED ? 'primary' : 'primary'
           }
         />
         <ProgressText>
           <Typography variant="body2">{`${scan.progress || 0}% Complete`}</Typography>
-          {scan.status === 'in_progress' && (
+          {scan.status === SCAN_STATUS.IN_PROGRESS && (
             <EstimatedTime variant="body2">
               Estimated Time Remaining: {getEstimatedTimeRemaining() || 'Calculating...'}
             </EstimatedTime>
@@ -351,23 +363,23 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
       <StyledDivider />
       <ActionsContainer>
         {/* Cancel Scan Button */}
-        {(scan.status === 'pending' || scan.status === 'in_progress') && (
+        {(scan.status === SCAN_STATUS.PENDING || scan.status === SCAN_STATUS.IN_PROGRESS) && (
           <CancelButton variant="contained" onClick={onCancel}>
             Cancel Scan
           </CancelButton>
         )}
 
         {/* View Results Button */}
-        {(scan.status === 'completed' || scan.status === 'failed') && (
+        {(scan.status === SCAN_STATUS.COMPLETED || scan.status === SCAN_STATUS.FAILED) && (
           <Button variant="contained" color="primary" onClick={onViewResults}>
             View Results
           </Button>
         )}
 
         {/* New Scan Button */}
-        {(scan.status === 'completed' ||
-          scan.status === 'failed' ||
-          scan.status === 'cancelled') && (
+        {(scan.status === SCAN_STATUS.COMPLETED ||
+          scan.status === SCAN_STATUS.FAILED ||
+          scan.status === SCAN_STATUS.CANCELLED) && (
           <Button variant="outlined" color="primary" onClick={onNewScan}>
             Start New Scan
           </Button>

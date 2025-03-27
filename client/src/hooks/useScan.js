@@ -5,6 +5,18 @@ import {
   cancelScan as cancelScanAction,
   getScanResults as fetchScanResultsAction,
 } from '../store/actions/scanActions';
+import scanService from '../services/scanService';
+
+/**
+ * Scan status constants
+ */
+const SCAN_STATUS = {
+  PENDING: 'pending',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+};
 
 /**
  * Custom hook for managing security scan operations
@@ -18,8 +30,13 @@ const useScan = () => {
   const startScan = useCallback(
     async (url, options = {}) => {
       try {
-        const scan = await dispatch(startScanAction(url, options));
-        return scan;
+        const scanData = {
+          url,
+          options,
+        };
+        
+        const result = await dispatch(startScanAction(scanData));
+        return result.payload;
       } catch (err) {
         console.error('Scan initiation failed', err);
         return null;
@@ -47,7 +64,7 @@ const useScan = () => {
     async scanId => {
       try {
         const results = await dispatch(fetchScanResultsAction(scanId));
-        return results;
+        return results.payload;
       } catch (err) {
         console.error('Fetching scan results failed', err);
         return null;
@@ -61,7 +78,7 @@ const useScan = () => {
 
   useEffect(() => {
     // Optional: Set up WebSocket or polling for real-time updates
-    if (currentScan && currentScan.status === 'in_progress') {
+    if (currentScan && currentScan.status === SCAN_STATUS.IN_PROGRESS) {
       const progressInterval = setInterval(() => {
         // Simulate or fetch real-time progress
         // In a real app, this would come from backend
@@ -77,10 +94,17 @@ const useScan = () => {
 
   // List recent scans
   const getRecentScans = useCallback(
-    (limit = 10) => {
-      return scanHistory.slice(0, limit);
+    async (limit = 10) => {
+      try {
+        const response = await scanService.getRecentScans(limit);
+        const scans = response.data || [];
+        return scans;
+      } catch (err) {
+        console.error('Failed to fetch recent scans', err);
+        return [];
+      }
     },
-    [scanHistory]
+    [] // Empty dependency array to prevent recreation on every render
   );
 
   return {

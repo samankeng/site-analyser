@@ -12,6 +12,7 @@ import {
 import api from '../../services/api';
 import { setAlert } from './alertActions';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { useCallback } from 'react';
 
 /**
  * Fetch overall dashboard data (React 19 & MUI v6 compatible)

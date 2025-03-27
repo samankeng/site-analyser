@@ -1,6 +1,20 @@
 import api from './api';
 
 /**
+ * API route constants for scan endpoints
+ */
+const API_ROUTES = {
+  SCAN: {
+    BASE: '/scans',
+    START: '/scans',
+    STATUS: '/scans/:scanId',
+    RESULTS: '/scans/:scanId/results',
+    CANCEL: '/scans/:scanId',
+    RECENT: '/scans/recent'
+  }
+};
+
+/**
  * Service for managing security scans
  */
 const scanService = {
@@ -17,7 +31,8 @@ const scanService = {
    */
   startScan: async (url, options = {}) => {
     try {
-      const response = await api.post('/scans/start', {
+      console.log("Making API request to /scans with data:", { url, ...options });
+      const response = await api.post(API_ROUTES.SCAN.START, {
         url,
         ...options,
       });
@@ -54,7 +69,7 @@ const scanService = {
    */
   getScanStatus: async scanId => {
     try {
-      const response = await api.get(`/scans/${scanId}/status`);
+      const response = await api.get(API_ROUTES.SCAN.STATUS.replace(':scanId', scanId));
       return response.data;
     } catch (error) {
       console.error('Get scan status error:', error.response?.data || error.message);
@@ -126,7 +141,7 @@ const scanService = {
    */
   getScanResults: async scanId => {
     try {
-      const response = await api.get(`/scans/${scanId}/results`);
+      const response = await api.get(API_ROUTES.SCAN.RESULTS.replace(':scanId', scanId));
       return response.data;
     } catch (error) {
       console.error('Get scan results error:', error.response?.data || error.message);
@@ -155,7 +170,7 @@ const scanService = {
    */
   cancelScan: async scanId => {
     try {
-      const response = await api.post(`/scans/${scanId}/cancel`);
+      const response = await api.delete(API_ROUTES.SCAN.CANCEL.replace(':scanId', scanId));
       return response.data;
     } catch (error) {
       console.error('Cancel scan error:', error.response?.data || error.message);
@@ -188,7 +203,7 @@ const scanService = {
    */
   getScanHistory: async (params = {}) => {
     try {
-      const response = await api.get('/scans/history', { params });
+      const response = await api.get(`${API_ROUTES.SCAN.BASE}/history`, { params });
       return response.data;
     } catch (error) {
       console.error('Get scan history error:', error.response?.data || error.message);
@@ -210,7 +225,7 @@ const scanService = {
    */
   getScanAnalysis: async (scanId, section) => {
     try {
-      let url = `/scans/${scanId}/analysis`;
+      let url = `${API_ROUTES.SCAN.BASE}/${scanId}/analysis`;
       if (section) {
         url += `/${section}`;
       }
@@ -241,7 +256,7 @@ const scanService = {
    */
   rescan: async (scanId, options = {}) => {
     try {
-      const response = await api.post(`/scans/${scanId}/rescan`, options);
+      const response = await api.post(`${API_ROUTES.SCAN.BASE}/${scanId}/rescan`, options);
       return response.data;
     } catch (error) {
       console.error('Rescan error:', error.response?.data || error.message);
@@ -269,7 +284,7 @@ const scanService = {
    */
   createScanProfile: async profileData => {
     try {
-      const response = await api.post('/scans/profiles', profileData);
+      const response = await api.post(`${API_ROUTES.SCAN.BASE}/profiles`, profileData);
       return response.data;
     } catch (error) {
       console.error('Create scan profile error:', error.response?.data || error.message);
@@ -289,7 +304,7 @@ const scanService = {
    */
   getScanProfiles: async () => {
     try {
-      const response = await api.get('/scans/profiles');
+      const response = await api.get(`${API_ROUTES.SCAN.BASE}/profiles`);
       return response.data;
     } catch (error) {
       console.error('Get scan profiles error:', error.response?.data || error.message);
@@ -311,7 +326,7 @@ const scanService = {
    */
   updateScanProfile: async (profileId, profileData) => {
     try {
-      const response = await api.put(`/scans/profiles/${profileId}`, profileData);
+      const response = await api.put(`${API_ROUTES.SCAN.BASE}/profiles/${profileId}`, profileData);
       return response.data;
     } catch (error) {
       console.error('Update scan profile error:', error.response?.data || error.message);
@@ -336,7 +351,7 @@ const scanService = {
    */
   deleteScanProfile: async profileId => {
     try {
-      const response = await api.delete(`/scans/profiles/${profileId}`);
+      const response = await api.delete(`${API_ROUTES.SCAN.BASE}/profiles/${profileId}`);
       return response.data;
     } catch (error) {
       console.error('Delete scan profile error:', error.response?.data || error.message);
@@ -363,7 +378,7 @@ const scanService = {
    */
   startProfileScan: async (url, profileId, overrides = {}) => {
     try {
-      const response = await api.post('/scans/start-with-profile', {
+      const response = await api.post(`${API_ROUTES.SCAN.BASE}/start-with-profile`, {
         url,
         profileId,
         overrides,
@@ -382,6 +397,23 @@ const scanService = {
         'Failed to start scan with profile.';
 
       throw new Error(errorMessage);
+    }
+  },
+
+  /**
+   * Get recent scans - convenience wrapper around getScanHistory
+   * @param {number} [limit=10] - Number of scans to retrieve
+   * @returns {Promise} List of recent scans
+   */
+  getRecentScans: async (limit = 10) => {
+    try {
+      const response = await api.get(API_ROUTES.SCAN.RECENT, {
+        params: { limit },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Get recent scans error:', error.message);
+      return { data: [] };
     }
   },
 };

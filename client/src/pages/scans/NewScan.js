@@ -34,15 +34,19 @@ const ActionButtonsContainer = styled('div')(({ theme }) => ({
 const NewScan = () => {
   const navigate = useNavigate();
   const { startScan } = useScan();
-  const { addAlert } = useAlert(); // Changed from showAlert to addAlert
+  const { addAlert } = useAlert();
 
   const [scanOptions, setScanOptions] = useState({
-    deepScan: false,
-    checkSSL: true,
-    checkHeaders: true,
-    checkPerformance: false,
-    checkVulnerabilities: true,
+    // Use the exact names expected by your backend
+    sslCheck: true, // instead of checkSSL
+    headerAnalysis: true, // instead of checkHeaders
+    vulnDetection: true, // instead of checkVulnerabilities
+    performanceCheck: false,
+    portScan: false, // you need to add this
+    contentAnalysis: false, // you need to add this
   });
+
+  
 
   const handleOptionChange = option => {
     setScanOptions(prev => ({

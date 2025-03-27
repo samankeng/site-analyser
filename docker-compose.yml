@@ -132,9 +132,9 @@ services:
       resources:
         limits:
           memory: 1GB
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-    #   - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
 
   # Redis cache
   redis:

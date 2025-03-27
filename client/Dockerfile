@@ -8,10 +8,10 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Install missing ESLint plugins
-RUN npm install --save-dev eslint-plugin-prettier eslint-config-prettier
+RUN npm install --save-dev eslint-plugin-prettier eslint-config-prettier --legacy-peer-deps
 
 # Copy all client files
 COPY . ./
