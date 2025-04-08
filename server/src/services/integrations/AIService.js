@@ -38,7 +38,7 @@ class AIService {
         data: analysisData,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'SiteAnalyzer/1.0'
+          'User-Agent': 'SiteAnalyser/1.0'
         },
         timeout: this.timeout
       });
@@ -303,7 +303,7 @@ class AIService {
         },
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'SiteAnalyzer/1.0'
+          'User-Agent': 'SiteAnalyser/1.0'
         },
         timeout: this.timeout
       });

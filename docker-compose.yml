@@ -139,6 +139,7 @@ services:
   # Redis cache
   redis:
     image: redis:alpine
+    container_name: site-analyser-redis
     command:
       [
         "redis-server",
@@ -157,7 +158,9 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - site-analyser-network
+      site-analyser-network:
+        aliases:
+          - redis
     restart: unless-stopped
     deploy:
       resources:
@@ -167,6 +170,7 @@ services:
 networks:
   site-analyser-network:
     driver: bridge
+    
 
 volumes:
   mongodb-data:

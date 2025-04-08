@@ -30,7 +30,11 @@ class ScanService {
       redis: {
         host: config.redis.host,
         port: config.redis.port,
-        password: config.redis.password || undefined
+        password: config.redis.password || undefined,
+        maxRetriesPerRequest: null, // Retry indefinitely
+        connectTimeout: 30000, // Longer timeout for initial connection
+        retryStrategy: function(times) {
+          return Math.min(times * 500, 5000); // Exponential backoff
       },
       defaultJobOptions: {
         attempts: 3,
@@ -38,7 +42,7 @@ class ScanService {
         removeOnFail: false,
         timeout: config.scan.timeout
       }
-    });
+  }});
 
     // Process jobs
     this.scanQueue.process(config.scan.concurrentScans, this.processScan.bind(this));
@@ -81,6 +85,17 @@ class ScanService {
       return job;
     } catch (error) {
       logger.error(`Error queueing scan: ${error.message}`);
+      // Update scan status to indicate queue failure
+    try {
+      const scan = await Scan.findById(scanId);
+      if (scan) {
+        scan.status = 'failed';
+        scan.error = `Failed to queue scan: ${error.message}`;
+        await scan.save();
+      }
+    } catch (updateError) {
+      logger.error(`Error updating scan status: ${updateError.message}`);
+    }
       throw error;
     }
   }
@@ -247,23 +262,241 @@ class ScanService {
     }
   }
 
+  sanitizeForMongoDB(obj) {
+    if (!obj) return null;
+    
+    try {
+      // Try first with known circular references removed
+      const safeObj = JSON.parse(JSON.stringify(obj, (key, value) => {
+        // Known circular reference fields
+        if (['issuerCertificate', 'parent', '_parent', 'socket', 'connection'].includes(key)) {
+          return undefined;
+        }
+        // Handle potential circular reference for objects that aren't primitives
+        if (typeof value === 'object' && value !== null && key !== '') {
+          return { ...value }; // Return a shallow copy
+        }
+        return value;
+      }));
+      return safeObj;
+    } catch (error) {
+      logger.error(`Error sanitizing object for MongoDB: ${error.message}`);
+      
+      // Fall back to a manual approach
+      // For objects, create a new clean object with just primitive values
+      if (typeof obj === 'object' && obj !== null) {
+        const cleanObj = {};
+        
+        // Only copy primitive values and arrays of primitives
+        Object.keys(obj).forEach(key => {
+          const value = obj[key];
+          
+          // Handle primitives
+          if (value === null || 
+              typeof value === 'string' || 
+              typeof value === 'number' || 
+              typeof value === 'boolean') {
+            cleanObj[key] = value;
+          }
+          // Handle arrays of primitives
+          else if (Array.isArray(value)) {
+            cleanObj[key] = value.map(item => {
+              if (item === null || 
+                  typeof item === 'string' || 
+                  typeof item === 'number' || 
+                  typeof item === 'boolean') {
+                return item;
+              }
+              // For objects in arrays, just keep their string representation or key properties
+              if (typeof item === 'object') {
+                return { 
+                  type: item.constructor.name,
+                  id: item.id || item._id || '',
+                  name: item.name || item.title || ''
+                };
+              }
+              return String(item);
+            });
+          }
+          // For nested objects, include a simplified version
+          else if (typeof value === 'object') {
+            // Just include key identification properties
+            cleanObj[key] = {
+              type: value.constructor.name,
+              id: value.id || value._id || '',
+              name: value.name || value.title || ''
+            };
+          }
+        });
+        
+        return cleanObj;
+      }
+      
+      // For non-objects, return as is
+      return obj;
+    }
+  }
+
   /**
    * Save scan results to database
    * @param {Object} scan - Scan document
    * @param {Object} scanResults - Results from various scanners
    * @returns {Promise<Object>} Saved result document
    */
+  // async saveResults(scan, scanResults) {
+  //   logger.debug(`Saving results for scan: ${scan._id}`);
+
+  //   // Create a sanitized copy of the results to remove circular references
+  // const sanitizedResults = {};
+  
+  // // Process each scanner result separately
+  // if (scanResults.ssl) {
+  //   sanitizedResults.ssl = this.sanitizeForMongoDB(scanResults.ssl);
+  // }
+  // if (scanResults.headers) {
+  //   sanitizedResults.headers = this.sanitizeForMongoDB(scanResults.headers);
+  // }
+  // if (scanResults.vulnerabilities) {
+  //   sanitizedResults.vulnerabilities = this.sanitizeForMongoDB(scanResults.vulnerabilities);
+  // }
+  // if (scanResults.ports) {
+  //   sanitizedResults.ports = this.sanitizeForMongoDB(scanResults.ports);
+  // }
+  // if (scanResults.content) {
+  //   sanitizedResults.content = this.sanitizeForMongoDB(scanResults.content);
+  // }
+  // if (scanResults.performance) {
+  //   sanitizedResults.performance = this.sanitizeForMongoDB(scanResults.performance);
+  // }
+    
+  //   // Calculate overall scores
+  //   const summary = this.calculateSummary(scanResults);
+    
+  //   // Create result document
+  //   const result = new Result({
+  //     scanId: scan._id,
+  //     url: scan.url,
+  //     results: scanResults,
+  //     summary,
+  //     createdAt: new Date()
+  //   });
+    
+  //   // Save result
+  //   await result.save();
+    
+  //   // Update scan with result reference and summary
+  //   scan.results = result._id;
+  //   scan.summary = summary;
+  //   await scan.save();
+    
+  //   return result;
+  // }
+
+
   async saveResults(scan, scanResults) {
     logger.debug(`Saving results for scan: ${scan._id}`);
     
-    // Calculate overall scores
-    const summary = this.calculateSummary(scanResults);
+    // Create a brand new object with only the essential data
+    const sanitizedResults = {};
+    
+    // Process SSL results
+    if (scanResults.ssl) {
+      try {
+        // For SSL, create a completely new simplified object
+        sanitizedResults.ssl = {
+          score: scanResults.ssl.score,
+          findings: Array.isArray(scanResults.ssl.findings) ? 
+            scanResults.ssl.findings.map(f => ({
+              title: f.title || '',
+              description: f.description || '',
+              severity: f.severity || 'info'
+            })) : [],
+          // Only include essential endpoint data
+          endpoints: Array.isArray(scanResults.ssl.endpoints) ?
+            scanResults.ssl.endpoints.map(ep => ({
+              ipAddress: ep.ipAddress,
+              grade: ep.grade,
+              hasWarnings: ep.hasWarnings
+            })) : []
+        };
+      } catch (error) {
+        logger.error(`Error sanitizing SSL results: ${error.message}`);
+        sanitizedResults.ssl = { score: 0, error: "Could not process SSL data" };
+      }
+    }
+    
+    // Process other results similarly
+    if (scanResults.headers) {
+      try {
+        sanitizedResults.headers = {
+          score: scanResults.headers.score,
+          findings: Array.isArray(scanResults.headers.findings) ? 
+            scanResults.headers.findings.map(f => ({
+              title: f.title || '',
+              description: f.description || '',
+              severity: f.severity || 'info',
+              header: f.header
+            })) : []
+        };
+      } catch (error) {
+        logger.error(`Error sanitizing headers results: ${error.message}`);
+        sanitizedResults.headers = { score: 0, error: "Could not process headers data" };
+      }
+    }
+    
+    // Process vulnerability results
+    if (scanResults.vulnerabilities) {
+      try {
+        sanitizedResults.vulnerabilities = {
+          score: scanResults.vulnerabilities.score,
+          findings: Array.isArray(scanResults.vulnerabilities.findings) ? 
+            scanResults.vulnerabilities.findings.map(f => ({
+              title: f.title || '',
+              description: f.description || '',
+              severity: f.severity || 'info',
+              cve: f.cve
+            })) : []
+        };
+      } catch (error) {
+        logger.error(`Error sanitizing vulnerability results: ${error.message}`);
+        sanitizedResults.vulnerabilities = { score: 0, error: "Could not process vulnerability data" };
+      }
+    }
+    
+    // Process port scan results
+    if (scanResults.ports) {
+      try {
+        sanitizedResults.ports = {
+          score: scanResults.ports.score,
+          openPorts: Array.isArray(scanResults.ports.openPorts) ? 
+            scanResults.ports.openPorts.map(p => ({
+              port: p.port,
+              service: p.service,
+              state: p.state
+            })) : [],
+          findings: Array.isArray(scanResults.ports.findings) ? 
+            scanResults.ports.findings.map(f => ({
+              title: f.title || '',
+              description: f.description || '',
+              severity: f.severity || 'info'
+            })) : []
+        };
+      } catch (error) {
+        logger.error(`Error sanitizing port scan results: ${error.message}`);
+        sanitizedResults.ports = { score: 0, error: "Could not process port scan data" };
+      }
+    }
+    
+    // Process content and performance similarly if needed
+    
+    // Calculate overall scores from the sanitized results
+    const summary = this.calculateSummary(sanitizedResults);
     
     // Create result document
     const result = new Result({
       scanId: scan._id,
       url: scan.url,
-      results: scanResults,
+      results: sanitizedResults,
       summary,
       createdAt: new Date()
     });
@@ -298,6 +531,7 @@ class ScanService {
         info: 0
       }
     };
+    
     
     // Count findings by severity
     Object.keys(results).forEach(component => {

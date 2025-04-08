@@ -4,6 +4,7 @@ const ApiError = require('../../utils/ApiError');
 const { isValidURL: validateUrl } = require('../../utils/validators');
 const { asyncHandler } = require('../../middleware/asyncHandler');
 const { SCAN_STATUS } = require('../../constants/scan-constants');
+const mongoose = require('mongoose');
 
 /**
  * Security Scan Controller
@@ -94,8 +95,17 @@ class ScanController {
       createdAt: new Date(),
     });
 
+    try {
+      console.log(`Attempting to queue scan: ${scan._id}`);
+      await ScanService.queueScan(scan._id);
+      console.log(`Scan queued successfully: ${scan._id}`);
+    } catch (error) {
+      console.error(`Failed to queue scan: ${error.message}`);
+      // You may want to set the scan status to failed here
+    }
+
     // Queue scan job
-    //await ScanService.queueScan(scan._id);
+    await ScanService.queueScan(scan._id);
 
     res.status(201).json({
       success: true,
@@ -208,41 +218,50 @@ class ScanController {
   });
 
   /**
-   * Cancel an ongoing scan
-   * @route DELETE /api/scans/:scanId
-   * @access Private
-   */
-  cancelScan = asyncHandler(async (req, res) => {
-    const { scanId } = req.params;
+ * Cancel an ongoing scan
+ * @route DELETE /api/scans/:scanId
+ * @access Private
+ */
+cancelScan = asyncHandler(async (req, res) => {
+  const { scanId } = req.params;
+  const { force } = req.query; // Add a force query parameter
 
-    const scan = await ScanModel.findById(scanId);
+  const scan = await ScanModel.findById(scanId);
 
-    if (!scan) {
-      throw new ApiError(404, 'Scan not found');
-    }
+  if (!scan) {
+    throw new ApiError(404, 'Scan not found');
+  }
 
-    // Check user authorization
-    if (scan.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      throw new ApiError(403, 'You are not authorized to cancel this scan');
-    }
+  // Check user authorization
+  if (scan.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    throw new ApiError(403, 'You are not authorized to cancel this scan');
+  }
 
-    // Check if scan can be cancelled
-    if (scan.status !== SCAN_STATUS.PENDING && scan.status !== SCAN_STATUS.IN_PROGRESS) {
-      throw new ApiError(400, `Cannot cancel scan with status: ${scan.status}`);
-    }
+  // Check if scan can be cancelled, unless force=true
+  if (!force && scan.status !== SCAN_STATUS.PENDING && scan.status !== SCAN_STATUS.IN_PROGRESS) {
+    throw new ApiError(400, `Cannot cancel scan with status: ${scan.status}`);
+  }
 
-    // Cancel the scan job
-    await ScanService.cancelScan(scanId);
+  // Cancel the scan job
+  await ScanService.cancelScan(scanId);
 
-    // Update scan status
+  // Update scan status - if forced and already complete/failed, mark as FAILED instead of CANCELLED
+  if (force && (scan.status === SCAN_STATUS.COMPLETED || scan.status === SCAN_STATUS.FAILED)) {
+    scan.status = SCAN_STATUS.FAILED;
+    scan.error = 'Manually reset due to stuck scan';
+  } else {
     scan.status = SCAN_STATUS.CANCELLED;
-    await scan.save();
+  }
+  
+  scan.progress = 100;
+  scan.completedAt = new Date();
+  await scan.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Scan cancelled successfully',
-    });
+  res.status(200).json({
+    success: true,
+    message: force ? 'Scan force reset successfully' : 'Scan cancelled successfully',
   });
+});
 
   /**
    * Delete a scan
@@ -281,6 +300,8 @@ class ScanController {
       message: 'Scan deleted successfully',
     });
   });
+
+  
 
   /**
    * Re-run a previous scan

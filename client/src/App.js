@@ -29,19 +29,6 @@ import NotFound from './pages/NotFound';
 import ErrorPage from './pages/ErrorPage';
 import ReportList from './pages/reports/ReportList';
 
-// // Create your theme
-// const theme = createTheme({
-//   palette: {
-//     primary: {
-//       main: '#1976d2', // Adjust to your primary color
-//     },
-//     // Add other palette configurations as needed
-//   },
-//   typography: {
-//     fontFamily: 'Roboto, Arial, sans-serif',
-//   },
-//   // Add other theme customizations
-// });
 
 function App() {
   const dispatch = useDispatch();
@@ -69,7 +56,7 @@ function App() {
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
                   <Route path="/scan" element={<PrivateRoute element={<NewScan />} />} />
-                  <Route path="/scan/:scanId" element={<PrivateRoute element={<ScanStatus />} />} />
+                  <Route path="/scans/:scanId" element={<PrivateRoute element={<ScanStatus />} />} />
                   <Route
                     path="/reports/:scanId"
                     element={<PrivateRoute element={<SecurityReport />} />}

@@ -22,6 +22,7 @@ router.get('/:scanId', controller.getScanStatus);
 router.get('/:scanId/results', controller.getScanResults);
 router.post('/:scanId/rerun', controller.rerunScan);
 router.delete('/:scanId', controller.cancelScan);
+
 router.delete('/:scanId/delete', controller.deleteScan);
 
 module.exports = router;

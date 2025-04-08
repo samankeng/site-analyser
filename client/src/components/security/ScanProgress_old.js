@@ -28,8 +28,6 @@ import CodeIcon from '@mui/icons-material/Code';
 import SpeedIcon from '@mui/icons-material/Speed';
 import WarningIcon from '@mui/icons-material/Warning';
 import { formatDuration } from '../../utils/formatters';
-import { getScanStatus } from '../../store/actions/scanActions';
-import { useAlert } from '../../contexts/AlertContext';
 
 /**
  * Scan status constants
@@ -158,14 +156,6 @@ const IconProgress = styled(CircularProgress)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-// Rate limit error handling
-const refreshIntervals = {
-  initial: 5000,       // Start at 5 seconds
-  backoff: 15000,      // Back off to 15 seconds if rate limited
-  completed: 30000,    // When completed, check less frequently
-  error: 10000         // Error state check interval
-};
-
 /**
  * Scan progress component for displaying the current status of a security scan
  *
@@ -180,73 +170,53 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const dispatch = useDispatch();
-  const { addAlert } = useAlert();
+  const scanStatus = useSelector(state => state.scans.currentScan?.status);
 
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
-  const [pollInterval, setPollInterval] = useState(refreshIntervals.initial);
-  const [rateLimitHit, setRateLimitHit] = useState(false);
 
   // Start timer when scan is in progress
   useEffect(() => {
     let timer;
 
-    if (scan && (scan.status === SCAN_STATUS.IN_PROGRESS || scan.status === SCAN_STATUS.PENDING)) {
+    if (scan.status === SCAN_STATUS.IN_PROGRESS || scan.status === SCAN_STATUS.PENDING) {
       timer = setInterval(() => {
         setTimeElapsed(prev => prev + 1);
       }, 1000);
-    } else if (scan && scan.startedAt && scan.completedAt) {
-      // Calculate elapsed time for completed scans
-      const start = new Date(scan.startedAt);
-      const end = new Date(scan.completedAt);
-      const diffSeconds = Math.floor((end - start) / 1000);
-      setTimeElapsed(diffSeconds);
     }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [scan?.status, scan?.startedAt, scan?.completedAt]);
+  }, [scan.status]);
+
+  useEffect(() => {
+    // Only poll if scan is in progress
+    if (scan._id && (scanStatus === 'pending' || scanStatus === 'in_progress')) {
+      const intervalId = setInterval(() => {
+        dispatch(getScanStatus(scan._id));
+      }, 3000);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [scan._id, scanStatus, dispatch]);
 
   // Update active step based on progress
   useEffect(() => {
-    if (!scan) return;
-    
-    const progress = scan.progress || 0;
-    
-    if (progress >= 75) {
+    if (scan.progress >= 75) {
       setActiveStep(3);
-    } else if (progress >= 50) {
+    } else if (scan.progress >= 50) {
       setActiveStep(2);
-    } else if (progress >= 25) {
+    } else if (scan.progress >= 25) {
       setActiveStep(1);
     } else {
       setActiveStep(0);
     }
-  }, [scan?.progress]);
-
-  // Normalize scan status from database to match UI constants
-  const normalizeStatus = (status) => {
-    if (!status) return SCAN_STATUS.PENDING;
-    
-    // Convert status to lowercase and handle different formats
-    const normalizedStatus = status.toLowerCase().replace(/_/g, '');
-    
-    if (normalizedStatus.includes('inprogress') || normalizedStatus.includes('in_progress')) 
-      return SCAN_STATUS.IN_PROGRESS;
-    if (normalizedStatus.includes('complete')) 
-      return SCAN_STATUS.COMPLETED;
-    if (normalizedStatus.includes('fail')) 
-      return SCAN_STATUS.FAILED;
-    if (normalizedStatus.includes('cancel')) 
-      return SCAN_STATUS.CANCELLED;
-    
-    return SCAN_STATUS.PENDING;
-  };
+  }, [scan.progress]);
 
   // Calculate estimated remaining time
   const getEstimatedTimeRemaining = () => {
-    if (!scan?.estimatedCompletionTime) return null;
+    if (!scan.estimatedCompletionTime) return null;
 
     const now = new Date();
     const completionTime = new Date(scan.estimatedCompletionTime);
@@ -260,14 +230,8 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
   };
 
   // Get status icon
-  const getStatusIcon = (status) => {
-    if (!status) return <IconProgress size={20} />;
-    
-    // Always normalize status to handle any potential inconsistencies
-    const normalizedStatus = normalizeStatus(status);
-    console.log('Normalized status for icon:', normalizedStatus, 'Original:', status);
-    
-    switch (normalizedStatus) {
+  const getStatusIcon = status => {
+    switch (status) {
       case SCAN_STATUS.COMPLETED:
         return <IconCompleted />;
       case SCAN_STATUS.FAILED:
@@ -279,9 +243,7 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
       case SCAN_STATUS.PENDING:
         return <IconProgress size={20} />;
       default:
-        // Fall back to in-progress for unrecognized status
-        console.warn('Unrecognized status:', status);
-        return <IconProgress size={20} />;
+        return null;
     }
   };
 
@@ -313,39 +275,6 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
     return steps;
   };
 
-  const handleForceReset = async () => {
-    try {
-      // Make direct API call to force cancel the scan 
-      addAlert('Attempting to force reset scan...', 'info');
-      
-      try {
-        // Try to make direct API call if onCancel fails
-        const response = await fetch(`/api/scans/${scan._id}?force=true`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        if (response.ok) {
-          addAlert('Scan state has been force reset', 'success');
-          // Refresh the page after successful force reset
-          window.location.reload();
-        } else {
-          // Fall back to the provided onCancel function
-          onCancel(true);
-        }
-      } catch (apiError) {
-        console.error('Direct API call failed, using onCancel fallback', apiError);
-        // Fall back to the provided onCancel function
-        onCancel(true);
-      }
-    } catch (error) {
-      addAlert(`Failed to reset scan: ${error.message}`, 'error');
-    }
-  };
-
   // Render loading state
   if (loading) {
     return (
@@ -360,105 +289,30 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
     );
   }
 
-  // If no scan data, show message
-  if (!scan || Object.keys(scan).length === 0) {
-    return (
-      <Root>
-        <LoadingContainer>
-          <Typography variant="h6">
-            No scan data available
-          </Typography>
-        </LoadingContainer>
-      </Root>
-    );
-  }
-
-  // Display formatted scan status 
-  const displayStatus = (status) => {
-    // If no status, show loading
-    if (!status) return 'LOADING';
-    
-    const normalizedStatus = normalizeStatus(status);
-    
-    // Format the status for display
-    if (normalizedStatus === SCAN_STATUS.IN_PROGRESS) return 'IN PROGRESS';
-    if (normalizedStatus === SCAN_STATUS.COMPLETED) return 'COMPLETED';
-    if (normalizedStatus === SCAN_STATUS.FAILED) return 'FAILED';
-    if (normalizedStatus === SCAN_STATUS.CANCELLED) return 'CANCELLED';
-    if (normalizedStatus === SCAN_STATUS.PENDING) return 'PENDING';
-    
-    // Fallback: uppercase whatever we got
-    return status.toUpperCase();
-  };
-
-  // Get progress value, ensuring it's a number and between 0-100
-  const getProgressValue = () => {
-    // Handle case where progress is missing
-    if (scan.progress === undefined || scan.progress === null) {
-      // Return different values based on status for better UX
-      if (normalizeStatus(scan.status) === SCAN_STATUS.COMPLETED) return 100;
-      if (normalizeStatus(scan.status) === SCAN_STATUS.FAILED) return 100;
-      if (normalizeStatus(scan.status) === SCAN_STATUS.CANCELLED) return 100;
-      if (normalizeStatus(scan.status) === SCAN_STATUS.IN_PROGRESS) return 50; // default to 50% for in-progress
-      return 0; // Default for pending or unknown
-    }
-    
-    const progress = Number(scan.progress);
-    if (isNaN(progress)) return 0;
-    return Math.min(Math.max(progress, 0), 100);
-  };
-
-  // Normalize scan.url, which might be in targetUrl or url
-  const scanUrl = scan.targetUrl || scan.url || '';
-
-  // For debugging
-  console.log('ScanProgress rendering with scan:', scan);
-
   // Render main scan progress view
   return (
     <Root>
       {/* Scan Header */}
       <Header>
         <Typography variant="h5">Security Scan Progress</Typography>
-        {scanUrl && (
-          <UrlChip icon={<WifiIcon />} label={scanUrl} color="primary" variant="outlined" />
+        {scan.targetUrl && (
+          <UrlChip icon={<WifiIcon />} label={scan.targetUrl} color="primary" variant="outlined" />
         )}
       </Header>
-
-      {/* Debug info in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <Box sx={{ mb: 2, p: 1, bgcolor: theme.palette.info.light, borderRadius: 1 }}>
-          <Typography variant="body2" color="info.dark">
-            Status: {scan.status || 'N/A'} | 
-            Progress: {scan.progress || 0}% | 
-            Has results: {scan.results ? 'Yes' : 'No'} | 
-            DB ID: {scan._id || 'N/A'}
-          </Typography>
-        </Box>
-      )}
-
-      {/* Rate limit warning if hit */}
-      {rateLimitHit && (
-        <Box sx={{ mb: 2, p: 1, bgcolor: theme.palette.warning.light, borderRadius: 1 }}>
-          <Typography variant="body2" color="warning.dark">
-            Status updates are being throttled due to API rate limits. Updates will continue at a slower pace.
-          </Typography>
-        </Box>
-      )}
 
       {/* Overall Progress */}
       <ProgressContainer>
         <LinearProgress
           variant="determinate"
-          value={getProgressValue()}
+          value={scan.progress || 0}
           color={
-            normalizeStatus(scan.status) === SCAN_STATUS.FAILED ? 'error' : 
-            normalizeStatus(scan.status) === SCAN_STATUS.COMPLETED ? 'success' : 'primary'
+            scan.status === SCAN_STATUS.FAILED ? 'error' : 
+            scan.status === SCAN_STATUS.COMPLETED ? 'primary' : 'primary'
           }
         />
         <ProgressText>
-          <Typography variant="body2">{`${getProgressValue()}% Complete`}</Typography>
-          {normalizeStatus(scan.status) === SCAN_STATUS.IN_PROGRESS && (
+          <Typography variant="body2">{`${scan.progress || 0}% Complete`}</Typography>
+          {scan.status === SCAN_STATUS.IN_PROGRESS && (
             <EstimatedTime variant="body2">
               Estimated Time Remaining: {getEstimatedTimeRemaining() || 'Calculating...'}
             </EstimatedTime>
@@ -473,7 +327,7 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             {getStatusIcon(scan.status)}
             <InfoValue sx={{ ml: 1 }}>
-              {displayStatus(scan.status)}
+              {scan.status ? scan.status.replace('_', ' ').toUpperCase() : 'N/A'}
             </InfoValue>
           </Box>
         </InfoItem>
@@ -484,15 +338,9 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
         <InfoItem item xs={12} sm={4}>
           <InfoLabel>Detected Issues</InfoLabel>
           <InfoValue
-            sx={{ color: scan.issues && scan.issues.length > 0 ? 'error.main' : 
-                 scan.summary && scan.summary.findings ? 
-                   theme.palette.error.main : 'inherit' }}
+            sx={{ color: scan.issues && scan.issues.length > 0 ? 'error.main' : 'inherit' }}
           >
-            {scan.issues ? scan.issues.length : 
-             scan.summary && scan.summary.findings ? 
-               (scan.summary.findings.critical || 0) + 
-               (scan.summary.findings.high || 0) + 
-               (scan.summary.findings.medium || 0) : 0}
+            {scan.issues ? scan.issues.length : 0}
           </InfoValue>
         </InfoItem>
       </InfoGrid>
@@ -529,48 +377,23 @@ const ScanProgress = ({ scan = {}, onCancel, onViewResults, onNewScan, loading =
       <StyledDivider />
       <ActionsContainer>
         {/* Cancel Scan Button */}
-        {(normalizeStatus(scan.status) === SCAN_STATUS.PENDING || 
-          normalizeStatus(scan.status) === SCAN_STATUS.IN_PROGRESS) && (
-          <Button 
-            variant="outlined" 
-            color="error" 
-            onClick={() => onCancel()}
-            >
+        {(scan.status === SCAN_STATUS.PENDING || scan.status === SCAN_STATUS.IN_PROGRESS) && (
+          <CancelButton variant="contained" onClick={onCancel}>
             Cancel Scan
-          </Button>
-        )}
-
-        {/* Force Reset Button - Only show for stuck scans */}
-        {(normalizeStatus(scan.status) === SCAN_STATUS.IN_PROGRESS && getProgressValue() >= 95) && (
-          <Button 
-            variant="outlined" 
-            color="warning" 
-            onClick={handleForceReset}
-            >
-            Force Reset Scan
-          </Button>
+          </CancelButton>
         )}
 
         {/* View Results Button */}
-        {(normalizeStatus(scan.status) === SCAN_STATUS.COMPLETED) && (
+        {(scan.status === SCAN_STATUS.COMPLETED || scan.status === SCAN_STATUS.FAILED) && (
           <Button variant="contained" color="primary" onClick={onViewResults}>
             View Results
           </Button>
         )}
 
-        {/* Debug Button - For stuck/failed scans */}
-        {(normalizeStatus(scan.status) === SCAN_STATUS.FAILED || 
-          normalizeStatus(scan.status) === SCAN_STATUS.CANCELLED ||
-          (normalizeStatus(scan.status) === SCAN_STATUS.COMPLETED && !scan.results)) && (
-          <Button variant="outlined" color="warning" onClick={handleForceReset}>
-            Force Reset Scan
-          </Button>
-        )}
-
         {/* New Scan Button */}
-        {(normalizeStatus(scan.status) === SCAN_STATUS.COMPLETED ||
-          normalizeStatus(scan.status) === SCAN_STATUS.FAILED ||
-          normalizeStatus(scan.status) === SCAN_STATUS.CANCELLED) && (
+        {(scan.status === SCAN_STATUS.COMPLETED ||
+          scan.status === SCAN_STATUS.FAILED ||
+          scan.status === SCAN_STATUS.CANCELLED) && (
           <Button variant="outlined" color="primary" onClick={onNewScan}>
             Start New Scan
           </Button>

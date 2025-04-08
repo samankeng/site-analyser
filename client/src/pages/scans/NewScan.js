@@ -86,7 +86,7 @@ const NewScan = () => {
 
         <StyledDivider />
 
-        <Section>
+        {/* <Section>
           <Typography variant="h6" gutterBottom>
             Scan Options
           </Typography>
@@ -107,22 +107,18 @@ const NewScan = () => {
               </Typography>
             </Grid>
           </Grid>
-        </Section>
+        </Section> */}
 
         <ActionButtonsContainer>
           <Button variant="outlined" color="inherit" onClick={() => navigate('/dashboard')}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              /* Trigger scan from form */
-            }}
+          {/* <Button
+            variant="contained" color="primary"  onClick={() => { }}
             disabled={!scanOptions}
           >
             Start Scan
-          </Button>
+          </Button> */}
         </ActionButtonsContainer>
       </StyledPaper>
     </StyledContainer>
